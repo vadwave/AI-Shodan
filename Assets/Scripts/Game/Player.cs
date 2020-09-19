@@ -186,7 +186,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         
     }
 
-    public void Rotate(float angle, float speed)
+    public void Rotate(float angle, float speed, float startAngle)
     {
 
     }

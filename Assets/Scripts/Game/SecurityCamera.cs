@@ -139,7 +139,7 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         isEscaped = false;
         while (true)
         {
-            Rotate(targetAngle, speedRotate);
+            Rotate(targetAngle, speedRotate, startAngle);
             yield return null;
         }
     }
@@ -157,14 +157,10 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         yield return IEWaitLastPos(waitTime * 0.5f, lastPos);
     }
 
-    public void Rotate(float targetAngle, float speedRotate)
-    {
-        Rotate(targetAngle, speedRotate, startAngle);
-    }
-    public void Rotate(float targetAngle, float speedRotate ,float curAngle)
+    public void Rotate(float targetAngle, float speedRotate , float startAngle)
     {
         targetAngle = (isReverse) ? -targetAngle : targetAngle;
-        float angle = curAngle - targetAngle;
+        float angle = startAngle - targetAngle;
         Quaternion QtargetAngle = Quaternion.Euler(0f, 0f, angle);
         if (CheckAngle(QtargetAngle, body.localRotation)) isReverse = !isReverse;
         body.localRotation = Quaternion.RotateTowards(body.localRotation, QtargetAngle, speedRotate * Time.deltaTime);

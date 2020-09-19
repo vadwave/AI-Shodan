@@ -17,7 +17,7 @@ public interface IMovable
 public interface IRotable
 {
     float SpeedRotate { get; }
-    void Rotate(float angle, float speed);
+    void Rotate(float angle, float speed, float startAngle);
 }
 public interface IEye 
 {
