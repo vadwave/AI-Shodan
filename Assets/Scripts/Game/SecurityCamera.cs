@@ -178,7 +178,7 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
             else
             {
                 SetLastPosition(pos);
-                if (GameMath.CheckRotatingToTarget(pos, body))
+                if (GameMath.CheckAngleToTarget(pos, body))
                     yield return IEWaitPosition(3f, pos);
             }       
             yield return null;

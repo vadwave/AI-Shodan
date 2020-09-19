@@ -24,7 +24,7 @@ public static class GameMath
         float oper = Mathf.Abs(Quaternion.Dot(objectRotation, targetRotation));
         return (oper > precision);
     }
-    public static bool CheckRotatingToTarget(Vector3 targetPosition, Transform objectTransform)
+    public static bool CheckAngleToTarget(Vector3 targetPosition, Transform objectTransform)
     {
         Vector2 dirToTarget = (targetPosition - objectTransform.position).normalized;
         float angle = Mathf.Atan2(dirToTarget.y, dirToTarget.x) * Mathf.Rad2Deg;
