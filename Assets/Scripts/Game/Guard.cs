@@ -12,7 +12,7 @@ namespace AIShodan
 
             public float Speed => throw new System.NotImplementedException();
 
-            public float SpeedTotate => throw new System.NotImplementedException();
+            public float SpeedRotate => throw new System.NotImplementedException();
 
             public bool OpenEye => throw new System.NotImplementedException();
 

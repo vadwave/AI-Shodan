@@ -36,21 +36,17 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
     public float Radius => radiusEye;
     public int Angle => angleEye;
     public bool OpenEye => openedEye;
-
     public float SpeedRotate => speedRotate;
 
+    Vector3 lastPos;
 
     bool isReverse = false;
     float startAngle = 0;
 
-
-    // Start is called before the first frame update
     void Start()
     {
 
     }
-
-    // Update is called once per frame
     void Update()
     {  
         stateMachineEx.Tick();
@@ -158,7 +154,7 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
             counter += Time.deltaTime;
             yield return null;
         }
-        yield return IEWaitLastPos(waitTime * 0.5f, lastPoint.position);
+        yield return IEWaitLastPos(waitTime * 0.5f, lastPos);
     }
 
     public void Rotate(float targetAngle, float speedRotate)
@@ -185,21 +181,28 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
     {
         Vector3 pos = GetTarget().position;
         isEscaped = false;
+        float speedMultiplier = 1.5f;
+        float speed = SpeedRotate * speedMultiplier;
         while (true)
         {
             if (GetTarget())
             {
-                RotateToTarget(pos);
+                RotateToTarget(pos,speed);
                 pos = GetTarget().position;
             }
             else
             {
-                lastPoint.position = pos;
+                SetLastPosition(pos);
                 if (CheckRotatingToTarget(pos))
                     yield return IEWaitLastPos(3f, pos);
             }       
             yield return null;
         }
+    }
+    void SetLastPosition(Vector3 position)
+    {
+        lastPos = position;
+        lastPoint.position = position;
     }
 
     bool CheckRotatingToTarget(Vector3 targetPosition)
@@ -214,9 +217,11 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
     IEnumerator IEWaitLastPos(float waitTime, Vector3 pos)
     {
         float counter = 0;
+        float speedMultiplier = 1.5f;
+        float speed = SpeedRotate * speedMultiplier;
         while (counter < waitTime)
         {
-            RotateToTarget(pos);
+            RotateToTarget(pos, speed);
             counter += Time.deltaTime;
             if (GetTarget())
             {
@@ -227,11 +232,12 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         if (!GetTarget()) isEscaped = true;
     }
 
-    void RotateToTarget(Vector3 targetPos)
+    void RotateToTarget(Vector3 targetPos, float speedRotate)
     {
         Vector2 dirToTarget = (targetPos - body.position).normalized;
         float angle = Mathf.Atan2(dirToTarget.x, dirToTarget.y) * Mathf.Rad2Deg;
-        body.rotation = Quaternion.RotateTowards(body.rotation, Quaternion.Euler(0f, 0f, -angle), (SpeedRotate*1.5f) * Time.deltaTime); //Quaternion.Euler(0f, 0f, -angle);
+        Quaternion qTarget = Quaternion.Euler(0f, 0f, -angle);
+        body.rotation = Quaternion.RotateTowards(body.rotation, qTarget, speedRotate * Time.deltaTime);
     }
 
     IEnumerator IEFindTargetsInRadius(float delay)
@@ -239,13 +245,13 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         while (true)
         {
             yield return new WaitForSeconds(delay);
-            FindVisibleTargets();
+            FindVisibleTargets(radiusEye);
         }
     }
-    void FindVisibleTargets()
+    void FindVisibleTargets(float radius)
     {
         visibleTargets.Clear();
-        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(body.position, radiusEye, targetMask);
+        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(body.position, radius, targetMask);
 
         for (int i = 0; i < targetsInViewRadius.Length; i++)
         {
