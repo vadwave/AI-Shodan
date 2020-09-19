@@ -110,7 +110,7 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
 
     public void Patrol(bool enable)
     {
-        if (enable) corRotate = StartCoroutine(IEPatrolRotate(targetAngle,SpeedRotate));
+        if (enable) corRotate = StartCoroutine(IEPatrolRotate());
         else StopCoroutine(corRotate);
         Find(enable);
     }
@@ -134,12 +134,12 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
 
 
 
-    IEnumerator IEPatrolRotate(float targetAngle, float speedRotate)
+    IEnumerator IEPatrolRotate()
     {
         isEscaped = false;
         while (true)
         {
-            Rotate(targetAngle, speedRotate, startAngle);
+            Rotate(targetAngle, SpeedRotate, startAngle);
             yield return null;
         }
     }
@@ -154,23 +154,12 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
             counter += Time.deltaTime;
             yield return null;
         }
-        yield return IEWaitLastPos(waitTime * 0.5f, lastPos);
+        yield return IEWaitPosition(waitTime * 0.5f, lastPos);
     }
 
-    public void Rotate(float targetAngle, float speedRotate , float startAngle)
+    public void Rotate(float targetAngle, float speedRotate, float middleAngle)
     {
-        targetAngle = (isReverse) ? -targetAngle : targetAngle;
-        float angle = startAngle - targetAngle;
-        Quaternion QtargetAngle = Quaternion.Euler(0f, 0f, angle);
-        if (CheckAngle(QtargetAngle, body.localRotation)) isReverse = !isReverse;
-        body.localRotation = Quaternion.RotateTowards(body.localRotation, QtargetAngle, speedRotate * Time.deltaTime);
-    }
-
-    bool CheckAngle(Quaternion targetRotation, Quaternion bodyRotation)
-    {
-        const float precision = 0.9999f;
-        float oper = Mathf.Abs(Quaternion.Dot(bodyRotation, targetRotation));
-        return (oper > precision);
+        GameMath.RotateLookAround(body, speedRotate, middleAngle, targetAngle, ref isReverse);
     }
 
     IEnumerator IETargetLock()
@@ -183,14 +172,14 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         {
             if (GetTarget())
             {
-                RotateToTarget(pos,speed);
+                GameMath.RotateToPosition(body, pos, speed);
                 pos = GetTarget().position;
             }
             else
             {
                 SetLastPosition(pos);
-                if (CheckRotatingToTarget(pos))
-                    yield return IEWaitLastPos(3f, pos);
+                if (GameMath.CheckRotatingToTarget(pos, body))
+                    yield return IEWaitPosition(3f, pos);
             }       
             yield return null;
         }
@@ -201,23 +190,14 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         lastPoint.position = position;
     }
 
-    bool CheckRotatingToTarget(Vector3 targetPosition)
-    {
-        Vector2 dirToTarget = (targetPosition - body.position).normalized;
-        float angle = Mathf.Atan2(dirToTarget.y, dirToTarget.x) * Mathf.Rad2Deg;
-        Quaternion QtargetAngle = Quaternion.Euler(0f, 0f, angle);
-        return !CheckAngle(QtargetAngle, body.localRotation);
-    }
-
-
-    IEnumerator IEWaitLastPos(float waitTime, Vector3 pos)
+    IEnumerator IEWaitPosition(float waitTime, Vector3 pos)
     {
         float counter = 0;
         float speedMultiplier = 1.5f;
         float speed = SpeedRotate * speedMultiplier;
         while (counter < waitTime)
         {
-            RotateToTarget(pos, speed);
+            GameMath.RotateToPosition(body, pos, speed);
             counter += Time.deltaTime;
             if (GetTarget())
             {
@@ -228,41 +208,12 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         if (!GetTarget()) isEscaped = true;
     }
 
-    void RotateToTarget(Vector3 targetPos, float speedRotate)
-    {
-        Vector2 dirToTarget = (targetPos - body.position).normalized;
-        float angle = Mathf.Atan2(dirToTarget.x, dirToTarget.y) * Mathf.Rad2Deg;
-        Quaternion qTarget = Quaternion.Euler(0f, 0f, -angle);
-        body.rotation = Quaternion.RotateTowards(body.rotation, qTarget, speedRotate * Time.deltaTime);
-    }
-
     IEnumerator IEFindTargetsInRadius(float delay)
     {
         while (true)
         {
             yield return new WaitForSeconds(delay);
-            FindVisibleTargets(radiusEye);
-        }
-    }
-    void FindVisibleTargets(float radius)
-    {
-        visibleTargets.Clear();
-        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(body.position, radius, targetMask);
-
-        for (int i = 0; i < targetsInViewRadius.Length; i++)
-        {
-            Transform target = targetsInViewRadius[i].transform;
-            Vector2 dirToTarget = (target.position - body.position).normalized;
-            Debug.DrawRay(body.position, dirToTarget, Color.red);
-            float angle = Vector2.Angle(body.up, dirToTarget);
-            if (angle < angleEye)
-            {
-                float dstToTarget = Vector2.Distance(body.position, target.position);
-                if (!Physics2D.Raycast(body.position, dirToTarget, dstToTarget, obstacleMask))
-                {
-                    visibleTargets.Add(target);
-                }
-            }
+            GameMath.FindVisibleTargets(body, visibleTargets, radiusEye, angleEye);
         }
     }
 }
