@@ -9,38 +9,34 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
     StateMachine stateMachine;
 
     [Header("IRotable")]
+    [SerializeField] float targetAngle = 90f;
     [SerializeField] float speedRotate = 1f;
     [SerializeField] Transform body;
 
 
     [Header("IEye")]
-    [SerializeField] float radiusEye = 10f;
+    [SerializeField] float viewDistance = 10f;
     [Range(0,360)]
-    [SerializeField] int angleEye = 20;
-    [SerializeField] bool openedEye = false;
-    [SerializeField] LayerMask targetMask;
-    [SerializeField] LayerMask obstacleMask;
+    [SerializeField] int viewAngle = 20;
+    [SerializeField] bool enableVision = false;
 
-    [SerializeField] Transform lastPoint;
-
-
+    [SerializeField] Transform lastPoint; //Debug
     [SerializeField] List<Transform> visibleTargets = new List<Transform>();
 
-    float targetAngle = 90f;
     const float timeDelay = 0.0f;
 
     Coroutine corRotate;
     Coroutine corFind;
-    private bool isEscaped;
 
-    public float Radius => radiusEye;
-    public int Angle => angleEye;
-    public bool OpenEye => openedEye;
+    bool isEscaped;
+    bool isReverse = false;
+
+    public float Radius => viewDistance;
+    public int Angle => viewAngle;
+    public bool OpenEye => enableVision;
     public float SpeedRotate => speedRotate;
 
     Vector3 lastPos;
-
-    bool isReverse = false;
     float startAngle = 0;
 
     void Start()
@@ -51,7 +47,7 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
     {  
         stateMachineEx.Tick();
     }
-    private void Awake()
+    void Awake()
     {
         startAngle = body.localRotation.eulerAngles.z;
         InitializeExtensibleStateMachine();
@@ -98,15 +94,9 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         Func<bool> Enable() => () => OpenEye;
         Func<bool> Disable() => () => !OpenEye;
     }
-    public Transform GetTarget()
-    {
-        if (visibleTargets.Count != 0)
-        {
-            return visibleTargets[0];
-        }
-        return null;
-    }
 
+
+    #region States
 
     public void Patrol(bool enable)
     {
@@ -126,13 +116,11 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         else StopCoroutine(corRotate);
         Find(enable);
     }
-    public void Find(bool enable)
-    {
-        if (enable) corFind = StartCoroutine(IEFindTargetsInRadius(timeDelay));
-        else StopCoroutine(corFind);
-    }
 
 
+    #endregion
+
+    #region IEnumerators
 
     IEnumerator IEPatrolRotate()
     {
@@ -150,18 +138,12 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         float curAngle = body.localRotation.eulerAngles.z;
         while (counter < waitTime)
         {
-            Rotate(targetAngle, speedRotate, curAngle);
+            RotateSearch(targetAngle, speedRotate, curAngle);
             counter += Time.deltaTime;
             yield return null;
         }
         yield return IEWaitPosition(waitTime * 0.5f, lastPos);
     }
-
-    public void Rotate(float targetAngle, float speedRotate, float middleAngle)
-    {
-        GameMath.RotateLookAround(body, speedRotate, middleAngle, targetAngle, ref isReverse);
-    }
-
     IEnumerator IETargetLock()
     {
         Vector3 pos = GetTarget().position;
@@ -172,7 +154,7 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         {
             if (GetTarget())
             {
-                GameMath.RotateToPosition(body, pos, speed);
+                GameMath.RotateToPosition(body, pos, speed, startAngle, targetAngle);
                 pos = GetTarget().position;
             }
             else
@@ -184,12 +166,6 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
             yield return null;
         }
     }
-    void SetLastPosition(Vector3 position)
-    {
-        lastPos = position;
-        lastPoint.position = position;
-    }
-
     IEnumerator IEWaitPosition(float waitTime, Vector3 pos)
     {
         float counter = 0;
@@ -197,7 +173,7 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         float speed = SpeedRotate * speedMultiplier;
         while (counter < waitTime)
         {
-            GameMath.RotateToPosition(body, pos, speed);
+            GameMath.RotateToPosition(body, pos, speed, startAngle, targetAngle);
             counter += Time.deltaTime;
             if (GetTarget())
             {
@@ -207,14 +183,47 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         }
         if (!GetTarget()) isEscaped = true;
     }
-
     IEnumerator IEFindTargetsInRadius(float delay)
     {
         while (true)
         {
             yield return new WaitForSeconds(delay);
-            GameMath.FindVisibleTargets(body, visibleTargets, radiusEye, angleEye);
+            GameMath.FindVisibleTargets(body, visibleTargets, viewDistance, viewAngle);
         }
     }
+
+    #endregion
+
+    #region Methods
+
+    public Transform GetTarget()
+    {
+        if (visibleTargets.Count != 0)
+        {
+            return visibleTargets[0];
+        }
+        return null;
+    }
+    void SetLastPosition(Vector3 position)
+    {
+        lastPos = position;
+        lastPoint.position = position;
+    }
+
+    public void Find(bool enable)
+    {
+        if (enable) corFind = StartCoroutine(IEFindTargetsInRadius(timeDelay));
+        else StopCoroutine(corFind);
+    }
+    public void Rotate(float targetAngle, float speedRotate, float middleAngle)
+    {
+        GameMath.RotateLookAround(body, speedRotate, middleAngle, targetAngle, ref isReverse);
+    }
+    public void RotateSearch(float targetAngle, float speedRotate, float middleAngle)
+    {
+        GameMath.RotateLookAround(body, speedRotate, middleAngle, targetAngle, this.startAngle, this.targetAngle, ref isReverse);
+    }
+
+    #endregion
 }
 
