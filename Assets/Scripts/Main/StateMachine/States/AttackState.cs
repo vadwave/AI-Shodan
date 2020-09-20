@@ -1,18 +1,34 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AttackState : MonoBehaviour
+public class AttackState : IState
 {
-    // Start is called before the first frame update
-    void Start()
+    IAttacking attacking;
+
+    public AttackState(IAttacking attacking)
+    {
+        this.attacking = attacking;
+    }
+
+    public void OnEnter()
+    {
+        this.attacking.Attack(true);
+    }
+
+    public void OnExit()
+    {
+        this.attacking.Attack(false);
+    }
+
+    public void Tick()
     {
         
     }
 
-    // Update is called once per frame
-    void Update()
+    public Type TypeTick()
     {
-        
+        return null;
     }
 }

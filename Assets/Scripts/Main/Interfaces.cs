@@ -41,9 +41,15 @@ public interface IDamageDealer
 {
     void DealDamage(IDamageable damageable, int amount);
 }
+
+public interface IAttacking : IDamageDealer, IWeapon
+{
+    float DistanceAttack { get; }
+}
 public interface IWeapon
 {
-    void Attack();
+    float Damage { get; }
+    void Attack(bool enable);
 }
 
 public interface IEquippable

@@ -78,19 +78,21 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
         AtAny(idle, Disable());
         At(idle, patrol, Enable());
 
-        At(patrol, allert, HasTarget());
+        At(patrol, allert, TargetVisible());
 
-        At(allert, search, NotTarget());
+        At(allert, search, NotTargetVisible());
 
-        At(search, allert, HasTarget());
-        At(search, patrol, NotTarget());
+        At(search, allert, TargetVisible());
+        At(search, patrol, NotTargetVisible());
+
         stateMachineEx.SetState(idle);
 
         void At(IState _to, IState _from, Func<bool> _condition) => stateMachineEx.AddTransition(_to, _from, _condition);
         void AtAny(IState _state, Func<bool> _conditionstate) => stateMachineEx.AddAnyTransition(_state, _conditionstate);
 
-        Func<bool> HasTarget() => () => (GetTarget() != null);
-        Func<bool> NotTarget() => () => isEscaped;
+        Func<bool> TargetVisible() => () => (GetTarget() != null);
+        Func<bool> NotTargetVisible() => () => isEscaped;
+
         Func<bool> Enable() => () => OpenEye;
         Func<bool> Disable() => () => !OpenEye;
     }
