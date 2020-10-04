@@ -2,13 +2,17 @@
 using Unity.MLAgents;
 using UnityEngine;
 
-public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEye
+public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEye, IPocket
 {
     [SerializeField] float health = 100f;
     [SerializeField] float moveSpeed = 5f;
     [SerializeField] float rotateSpeed = 3f;
     [SerializeField] Rigidbody2D rigidbody;
     [SerializeField] Transform body;
+
+    public float scores = 0;
+    public int keys = 0;
+
     public float Health => health;
 
     public float Speed => moveSpeed;
@@ -21,6 +25,10 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     public int Angle => throw new System.NotImplementedException();
 
+    public int Keys => keys;
+
+    public float Scores => scores;
+
     public void DealDamage(IDamageable damageable, int amount)
     {
         throw new System.NotImplementedException();
@@ -28,10 +36,8 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     public void Find(bool enable)
     {
-        
+        throw new System.NotImplementedException();
     }
-
-
 
     public void TakeDamage(int amount)
     {
@@ -189,5 +195,25 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     public void Rotate(float angle, float speed, float startAngle)
     {
 
+    }
+
+    public bool UseKey()
+    {
+        if (Keys > 0)
+        {
+            keys--;
+            return true;
+        }
+        return false;
+    }
+
+    public void AddKey()
+    {
+        keys++;
+    }
+
+    public void Collect()
+    {
+        scores++;
     }
 }

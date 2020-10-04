@@ -14,6 +14,17 @@ public interface IMovable
 
     void Move();    
 }
+
+public interface IPocket 
+{
+    int Keys { get; }
+    float Scores { get; }
+
+    bool UseKey();
+    void AddKey();
+    void Collect();
+}
+
 public interface IRotable
 {
     float SpeedRotate { get; }
@@ -56,6 +67,11 @@ public interface IEquippable
 {
     void Equip();
     void Unequip();
+}
+
+public interface ITakeable
+{
+    void Take(Collider2D collision);
 }
 
 public interface IHeatlh

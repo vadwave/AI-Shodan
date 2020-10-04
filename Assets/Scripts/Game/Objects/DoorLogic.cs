@@ -5,6 +5,7 @@ using UnityEngine;
 public class DoorLogic : MonoBehaviour
 {
     Animator animator;
+    [SerializeField] bool isLocked = false;
 
     private void Awake()
     {
@@ -19,12 +20,33 @@ public class DoorLogic : MonoBehaviour
     {
         animator.SetBool("Open", false);
     }
+    bool Unlocked(Collider2D collision)
+    {
+        if (isLocked)
+        {
+            IPocket pocket = collision.transform.parent.GetComponent<IPocket>();
+            bool isOpen = pocket.UseKey();
+            isLocked = !isOpen;
+            return isOpen;
+        }
+        return true;
+    }
+    bool DetectCharacter(Collider2D collision)
+    {
+        IMovable character = collision.transform.parent.GetComponent<IMovable>();
+        if (character != null) return true;
+        else return false;
+    }
+
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        OpenDoor();
+        if (!DetectCharacter(collision)) return;
+        if (Unlocked(collision)) OpenDoor();
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
+        if (!DetectCharacter(collision)) return;
         CloseDoor();
     }
 }
