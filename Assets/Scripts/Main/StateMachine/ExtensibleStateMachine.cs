@@ -37,7 +37,7 @@ public class ExtensibleStateMachine : MonoBehaviour
 
         current?.OnExit();
         current = state;
-        Debug.Log(current.ToString());
+        Debug.Log(current.ToString() + " - " + this.gameObject);
 
         transitions.TryGetValue(current.GetType(), out currentTransitions);
         if (currentTransitions == null)

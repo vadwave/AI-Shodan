@@ -1106,6 +1106,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5455982484905940400, guid: 864bef33b57223d4f9d8ebdfdec4cfe3, type: 3}
   m_PrefabInstance: {fileID: 1475182188}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &407950393 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4714100407222857359, guid: b95bbd9f638fa6043a0766e51a8a8260, type: 3}
+  m_PrefabInstance: {fileID: 4714100407252564317}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &417368003 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5455982484905940400, guid: 864bef33b57223d4f9d8ebdfdec4cfe3, type: 3}
@@ -4439,6 +4444,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4714100407222857357, guid: b95bbd9f638fa6043a0766e51a8a8260, type: 3}
+      propertyPath: body
+      value: 
+      objectReference: {fileID: 407950393}
     - target: {fileID: 4714100407222857359, guid: b95bbd9f638fa6043a0766e51a8a8260, type: 3}
       propertyPath: m_LocalPosition.x
       value: 3.75
@@ -4547,10 +4556,6 @@ PrefabInstance:
     - target: {fileID: 4841508162000973193, guid: 966b10954b7d82540ba2fb9b9d77fb32, type: 3}
       propertyPath: m_Name
       value: Door
-      objectReference: {fileID: 0}
-    - target: {fileID: 4841508162000973193, guid: 966b10954b7d82540ba2fb9b9d77fb32, type: 3}
-      propertyPath: m_Layer
-      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 966b10954b7d82540ba2fb9b9d77fb32, type: 3}
