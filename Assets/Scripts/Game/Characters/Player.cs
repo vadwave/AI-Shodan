@@ -1,5 +1,4 @@
-﻿using Unity.Mathematics;
-using Unity.MLAgents;
+﻿using Unity.MLAgents;
 using UnityEngine;
 
 public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEye, IPocket
