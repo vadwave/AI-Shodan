@@ -5,7 +5,7 @@
 
 public enum Direction
 {
-    Up, Down, Left, Right
+    Up = 0, Down = 1, Left = 2, Right = 3
 }
 public enum TypeWall
 {
@@ -13,6 +13,7 @@ public enum TypeWall
 }
 public enum TypeTile
 {
-    Null, Start, Exit, Locked, Key, Collectable, EnterPortal, ExitPortal
+    Null, Start, Exit, Locked, Key, Collectable, EnterPortal, ExitPortal,
+    Enemy
 }
 

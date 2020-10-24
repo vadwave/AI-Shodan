@@ -376,9 +376,9 @@ MonoBehaviour:
   targetAngle: 90
   speedRotate: 25
   body: {fileID: 9075203221589239600}
-  viewDistance: 10
+  viewDistance: 3.4
   viewAngle: 20
-  enableVision: 0
+  enableVision: 1
   lastPoint: {fileID: 0}
   visibleTargets: []
 --- !u!58 &1063304336
@@ -394,7 +394,7 @@ CircleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 0.6}
   serializedVersion: 2
   m_Radius: 4
 --- !u!1 &9075203221160388204

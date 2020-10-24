@@ -92,27 +92,34 @@ public class TileEntity : MonoBehaviour
     {
         float maxPos = pillars.LeftDown.localPosition.x;
         float halfPos = maxPos * 0.5f;
-        Vector3 position= new Vector3(0,0,0);
+        Vector3 position= new Vector3(0, 0, 0);
+        Vector3 rotation = new Vector3(0, 0, 0);
         bool isChange = false;
         if(walls.Left.Type == TypeWall.Wall)
         {
             position = walls.Left.Point.localPosition; isChange = true;
+            rotation = new Vector3(0, 0, -90);
         }
         else if (walls.Right.Type == TypeWall.Wall)
         {
             position = walls.Right.Point.localPosition; isChange = true;
+            rotation = new Vector3(0, 0, 90);
         }
         else if (walls.Up.Type == TypeWall.Wall)
         {
             position = walls.Up.Point.localPosition; isChange = true;
+            rotation = new Vector3(0, 0, 0);
         }
         else if (walls.Down.Type == TypeWall.Wall)
         {
             position = walls.Down.Point.localPosition; isChange = true;
+            rotation = new Vector3(0, 0, 180);
         }
         if (isChange)
         {
-            Instantiate(prefab, position, Quaternion.identity, ParentOjects);
+            GameObject enemy = Instantiate(prefab, new Vector3(0, 0, 0), Quaternion.identity, ParentOjects);
+            enemy.transform.localPosition = position;
+            enemy.transform.localRotation = Quaternion.Euler(rotation);
             return true;
         }
         return false;

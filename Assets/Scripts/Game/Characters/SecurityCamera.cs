@@ -49,8 +49,17 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
     }
     void Awake()
     {
+        if (!lastPoint)
+        {
+            lastPoint = GameObject.Find("LastPoint").transform;
+        }
         startAngle = body.localRotation.eulerAngles.z;
         InitializeExtensibleStateMachine();
+    }
+
+    public void ActivateAI(bool enable)
+    {
+        enableVision = enable;
     }
 
     void InitializeStateMachine()

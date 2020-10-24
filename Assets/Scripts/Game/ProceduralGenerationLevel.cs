@@ -18,6 +18,7 @@ public class ProceduralGenerationLevel : MonoBehaviour
     [SerializeField] SpawnPrefab Passage;
     [SerializeField] SpawnPrefab Door;
     [Header("Element Enemies")]
+    [SerializeField] int countEnemies = 5;
     [SerializeField] SpawnPrefab Camera;
     [SerializeField] SpawnPrefab Guard;
     [Header("Element Collectibles")]
@@ -34,17 +35,35 @@ public class ProceduralGenerationLevel : MonoBehaviour
     private List<TileEntity> unvisited;
     private TileEntity current;
 
+
+    public event System.Action OnLevelBuild;
+
     private void Start()
     {
         Initialize();
         CreateLayout();
         GenerateCollectables();
         GenerateEnemies();
+        OnLevelBuild.Invoke();
     }
 
     private void GenerateEnemies()
     {
-        
+        for (int i = 0; i < countEnemies; i++)
+        {
+            int x = Random.Range(0, sizeMaze.x - 1);
+            int y = Random.Range(0, sizeMaze.y - 1);
+
+            if (tiles[x, y].Type == TypeTile.Null)
+            {
+                GameObject enemy = Camera.Prefab;
+                tiles[x, y].SpawnOnWall(enemy);
+                tiles[x, y].gameObject.name += " Enemy";
+                tiles[x, y].Type = TypeTile.Enemy;
+            }
+            else i--;
+
+        }
     }
 
     private void GenerateCollectables()
@@ -162,6 +181,10 @@ public class ProceduralGenerationLevel : MonoBehaviour
         foreach (TileEntity tile in tilesCenter)
             tile.Type = TypeTile.Start;
 
+        int randomTile = 0; // Random.Range(0, tilesCenter.Length - 1);
+        Direction randomDir = Direction.Up;
+        CreateStart(tilesCenter[randomTile], randomDir);
+
         List<int> rndList = new List<int> { 0, 1, 2, 3 };
         int startCell = rndList[Random.Range(0, rndList.Count)];
         rndList.Remove(startCell);
@@ -194,7 +217,7 @@ public class ProceduralGenerationLevel : MonoBehaviour
             List<TileEntity> unvisitedNeighbours = GetUnvisitedNeighbours(current);
             if (unvisitedNeighbours.Count > 0)
             {
-                checkTile = unvisitedNeighbours[UnityEngine.Random.Range(0, unvisitedNeighbours.Count)];
+                checkTile = unvisitedNeighbours[Random.Range(0, unvisitedNeighbours.Count)];
                 stack.Add(current);
                 CompareWalls(current, checkTile);
                 current = checkTile;
@@ -253,7 +276,16 @@ public class ProceduralGenerationLevel : MonoBehaviour
             case Direction.Down: tile.ChangeWall(Direction.Down, ExitDoor, TypeWall.Exit); break;
         }
     }
-
+    public void CreateStart(TileEntity tile, Direction dir)
+    {
+        switch (dir)
+        {
+            case Direction.Left: tile.ChangeWall(Direction.Left, StartDoor, TypeWall.Start); break;
+            case Direction.Right: tile.ChangeWall(Direction.Right, StartDoor, TypeWall.Start); break;
+            case Direction.Up: tile.ChangeWall(Direction.Up, StartDoor, TypeWall.Start); break;
+            case Direction.Down: tile.ChangeWall(Direction.Down, StartDoor, TypeWall.Start); break;
+        }
+    }
     public EntityWall SelectEnter()
     {
         SpawnPrefab[] list = GetSortPrefabs(new SpawnPrefab[] { Door, Passage });
