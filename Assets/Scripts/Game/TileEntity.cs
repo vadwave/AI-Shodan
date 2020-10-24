@@ -92,10 +92,10 @@ public class TileEntity : MonoBehaviour
     {
         float maxPos = pillars.LeftDown.localPosition.x;
         float halfPos = maxPos * 0.5f;
-        Vector3 position= new Vector3(0, 0, 0);
+        Vector3 position = new Vector3(0, 0, 0);
         Vector3 rotation = new Vector3(0, 0, 0);
         bool isChange = false;
-        if(walls.Left.Type == TypeWall.Wall)
+        if (walls.Left.Type == TypeWall.Wall)
         {
             position = walls.Left.Point.localPosition; isChange = true;
             rotation = new Vector3(0, 0, -90);
@@ -124,7 +124,21 @@ public class TileEntity : MonoBehaviour
         }
         return false;
     }
-
+    public bool SpawnOnFloor(GameObject prefab)
+    {
+        bool isChange = true;
+        if (isChange)
+        {
+            GameObject collect = Instantiate(prefab, ParentOjects);
+            float x = Random.Range(-0.5f, 0.5f);
+            float y = Random.Range(-0.5f, 0.5f);
+            float z = Random.Range(0f, 360f);
+            collect.transform.localPosition = new Vector3(x, y, collect.transform.localPosition.z);
+            collect.transform.localRotation = Quaternion.AngleAxis(z, Vector3.forward);
+            return true;
+        }
+        return false;
+    }
 
     void ClearWalls()
     {

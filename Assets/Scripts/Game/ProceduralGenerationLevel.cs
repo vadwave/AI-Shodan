@@ -62,13 +62,25 @@ public class ProceduralGenerationLevel : MonoBehaviour
                 tiles[x, y].Type = TypeTile.Enemy;
             }
             else i--;
-
         }
     }
 
     private void GenerateCollectables()
     {
-        
+        for (int i = 0; i < countEnemies; i++)
+        {
+            int x = Random.Range(0, sizeMaze.x - 1);
+            int y = Random.Range(0, sizeMaze.y - 1);
+
+            if (tiles[x, y].Type == TypeTile.Null || tiles[x, y].Type == TypeTile.Enemy)
+            {
+                GameObject collect = InfoFile.Prefab;
+                tiles[x, y].SpawnOnFloor(collect);
+                tiles[x, y].gameObject.name += " Collectable";
+                tiles[x, y].Type = TypeTile.Collectable;
+            }
+            else i--;
+        }
     }
 
     public void Initialize()
