@@ -3,6 +3,7 @@
 public class Utils : Singleton<Utils>
 {
     [SerializeField] LayerMask targetMask;
+    [SerializeField] LayerMask guardMask;
     [SerializeField] LayerMask obstacleMask;
     [SerializeField] Camera main;
     // Start is called before the first frame update
@@ -23,6 +24,6 @@ public class Utils : Singleton<Utils>
 
     protected override void AwakeSingleton()
     {
-        GameMath.Initialize(obstacleMask,targetMask);
+        GameMath.Initialize(obstacleMask, targetMask, guardMask);
     }
 }

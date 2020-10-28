@@ -3,15 +3,17 @@ using UnityEngine;
 
 public static class GameMath
 {
-    const float precision = 0.9999f;
+    const float precision = 0.9999999f;
 
     static LayerMask targetMask;
+    static LayerMask guardMask;
     static LayerMask obstacleMask;
+    
 
-
-    public static void Initialize(LayerMask obstacleMask, LayerMask targetMask)
+    public static void Initialize(LayerMask obstacleMask, LayerMask targetMask, LayerMask guardMask)
     {
         GameMath.targetMask = targetMask;
+        GameMath.guardMask = guardMask;
         GameMath.obstacleMask = obstacleMask;
     }
 
@@ -92,11 +94,20 @@ public static class GameMath
     #endregion
 
     #region Find
-    public static List<Transform> FindVisibleTargets(Transform objectTransform, List<Transform> visibleTargets, float radius, float viewAngle)
+    public static List<Transform> FindVisibleTargets(Transform objectTransform, List<Transform> visibleTargets, float radius, float viewAngle, bool isThief = false)
     {
         visibleTargets.Clear();
-        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(objectTransform.position, radius, targetMask);
 
+        LayerMask curTargetMask = targetMask;
+        if (isThief) curTargetMask = guardMask;
+
+        var line = (objectTransform.up * radius);
+
+        Debug.DrawLine(objectTransform.position,  (Quaternion.Euler(0, 0, -viewAngle) * line) + objectTransform.position, Color.blue);
+        Debug.DrawLine(objectTransform.position,  (Quaternion.Euler(0, 0, viewAngle) * line) + objectTransform.position, Color.yellow);
+        Debug.DrawLine(objectTransform.position, (line) + objectTransform.position, Color.green);
+
+        Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(objectTransform.position, radius, curTargetMask);
         for (int i = 0; i < targetsInViewRadius.Length; i++)
         {
             Transform target = CheckTarget(objectTransform, targetsInViewRadius[i].transform, viewAngle);

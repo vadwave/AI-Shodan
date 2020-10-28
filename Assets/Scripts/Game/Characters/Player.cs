@@ -1,4 +1,6 @@
-﻿using Unity.MLAgents;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Unity.MLAgents;
 using UnityEngine;
 
 public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEye, IPocket
@@ -9,8 +11,25 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     [SerializeField] Rigidbody2D rigidbody;
     [SerializeField] Transform body;
 
+    [Header("IEye")]
+    [SerializeField] float viewDistance = 10f;
+    [Range(0, 360)]
+    [SerializeField] int viewAngle = 20;
+    [SerializeField] bool enableVision = false;
+
+    [SerializeField] Transform lastPoint; //Debug
+    [SerializeField] List<Transform> visibleTargets = new List<Transform>();
+
+
+
+    const float timeDelay = 0.0f;
+
     public float scores = 0;
     public int keys = 0;
+
+
+    Coroutine corFind;
+
 
     public float Health => health;
 
@@ -35,7 +54,17 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     public void Find(bool enable)
     {
-        throw new System.NotImplementedException();
+        if (enable)
+        {
+            if (corFind == null)
+                corFind = StartCoroutine(IEFindTargetsInRadius(timeDelay));
+        }
+        else 
+        { 
+            StopCoroutine(corFind);
+            corFind = null;
+        }
+        CheckTargets();
     }
 
     public void TakeDamage(int amount)
@@ -55,14 +84,16 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     }
 
-
-
-
     public override void OnActionReceived(float[] vectorAction)
     {
         base.OnActionReceived(vectorAction);
         Move(vectorAction);
+        Find(true);
     }
+
+    #endregion
+
+    #region Moving
 
     public void Move(float[] vectorAction)
     {
@@ -91,85 +122,23 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         dir += transform.right * vectorAction[1] * moveSpeed;
         angleRotate = vectorAction[2];
     }
-
-    #region Old
-    void InputOldControl(ref float[] actionsOut)
-    {
-        if (Input.GetKey(KeyCode.W))
-        {
-            actionsOut[0] = 1;
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            actionsOut[0] = 2;
-        }
-        //right
-        if (Input.GetKey(KeyCode.A))
-        {
-            actionsOut[1] = 1;
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            actionsOut[1] = 2;
-        }
-        //rotate
-        if (Input.GetKey(KeyCode.E))
-        {
-            actionsOut[2] = 1;
-        }
-        if (Input.GetKey(KeyCode.Q))
-        {
-            actionsOut[2] = 2;
-        }
-        Vector3 mousePos = Utils.Instance.GetPosMousePosition();
-        Vector2 direction = (mousePos - transform.position).normalized;
-        float angle = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg;
-        actionsOut[3] = angle;
-    }
-    void GetOldDirection(float[] vectorAction, out Vector3 dir, out Vector3 rotateDir, out float angleRotate)
-    {
-        dir = Vector3.zero;
-        rotateDir = Vector3.zero;
-
-        float forwardAxis = vectorAction[0];
-        float rightAxis = vectorAction[1];
-        float rotateAxis = vectorAction[2];
-        angleRotate = vectorAction[3];
-
-        switch (forwardAxis)
-        {
-            case 1:
-                dir += transform.up * moveSpeed;
-                break;
-            case 2:
-                dir += transform.up * -moveSpeed;
-                break;
-        }
-
-        switch (rightAxis)
-        {
-            case 1:
-                dir += transform.right * -moveSpeed;
-                break;
-            case 2:
-                dir += transform.right * moveSpeed;
-                break;
-        }
-
-        switch (rotateAxis)
-        {
-            case 1:
-                rotateDir = transform.forward * -1f;
-                break;
-            case 2:
-                rotateDir = transform.forward * 1f;
-                break;
-        }
-    }
+    
     #endregion
 
-    #endregion
 
+
+    #region Coroutines
+
+    IEnumerator IEFindTargetsInRadius(float delay)
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(delay);
+            GameMath.FindVisibleTargets(body, visibleTargets, viewDistance, viewAngle, true);
+        }
+    }
+
+    #endregion
 
 
     void Start()
@@ -181,6 +150,27 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         
     }
 
+
+    void CheckTargets()
+    {
+       foreach(Transform target in visibleTargets)
+        {
+            if (target.GetComponent<SecurityCamera>())
+            {
+
+            }
+            else if (target.GetComponent<Guard>())
+            {
+
+            }
+            else if (target.GetComponent<CollectLogic>())
+            {
+
+            }
+        }
+    }
+
+
     public void Move()
     {
         
@@ -188,7 +178,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     public void Alert(bool enable)
     {
-        
+
     }
 
     public void Rotate(float angle, float speed, float startAngle)
