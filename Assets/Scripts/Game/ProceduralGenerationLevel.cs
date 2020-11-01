@@ -7,6 +7,7 @@ public class ProceduralGenerationLevel : MonoBehaviour
 {
     [SerializeField] Vector2Int sizeMaze;
     [SerializeField] int seed;
+    [SerializeField] bool isRandom = false;
 
     [Header("Prefabs")]
     [SerializeField] TileEntity prefab;
@@ -35,17 +36,14 @@ public class ProceduralGenerationLevel : MonoBehaviour
     private List<TileEntity> unvisited;
     private TileEntity current;
 
+    private bool isReset = false;
+
+    public GameObject Level => mazeParent;
 
     public event System.Action OnLevelBuild;
+    public event Action<Transform> OnSetExit;
+    public event Action<Transform> OnSetStart;
 
-    private void Start()
-    {
-        Initialize();
-        CreateLayout();
-        GenerateCollectables();
-        GenerateEnemies();
-        OnLevelBuild.Invoke();
-    }
 
     private void GenerateEnemies()
     {
@@ -83,14 +81,69 @@ public class ProceduralGenerationLevel : MonoBehaviour
         }
     }
 
-    public void Initialize()
+    internal void DestroyMaze()
     {
+        if (isRandom) { Destroy(mazeParent); isReset = false; }
+        else ResetTiles();
+    }
+    void ResetTiles()
+    {
+        isReset = true;
+        for (int x = 0; x < sizeMaze.x; x++)
+        {
+            for (int y = 0; y < sizeMaze.y; y++)
+            {
+                switch (tiles[x, y].Type)
+                {
+                    case TypeTile.Collectable:
+                        {
+                            tiles[x, y].Type = TypeTile.Null;
+                            tiles[x, y].ClearObjects();
+                            tiles[x, y].gameObject.name.Replace(" Enemy", "");
+                            tiles[x, y].gameObject.name.Replace(" Collectable", "");
+                        }
+                        break;
+                    case TypeTile.Key:
+                        {
+
+                        }
+                        break;
+                    case TypeTile.Enemy:
+                        {
+                            tiles[x, y].Type = TypeTile.Null;
+                            tiles[x, y].ClearObjects();
+                            tiles[x, y].gameObject.name.Replace(" Enemy","");
+                            tiles[x, y].gameObject.name.Replace(" Collectable", "");
+                        }
+                        break;
+                }
+            }
+        }
+    }
+
+
+    void InitializeParent()
+    {
+        if(isRandom)
+        seed = Random.Range(100000, 999999);
         Random.InitState(seed);
         mazeParent = new GameObject();
         mazeParent.transform.parent = this.transform;
         mazeParent.name = "Level";
         tiles = new TileEntity[sizeMaze.x, sizeMaze.y];
         unvisited = new List<TileEntity>();
+    }
+
+    public void Initialize()
+    {
+        if (!isReset)
+        {
+            InitializeParent();
+            CreateLayout();
+        }
+        GenerateCollectables();
+        GenerateEnemies();
+        OnLevelBuild.Invoke();
     }
 
     public void CreateLayout()
@@ -287,6 +340,8 @@ public class ProceduralGenerationLevel : MonoBehaviour
             case Direction.Up: tile.ChangeWall(Direction.Up, ExitDoor, TypeWall.Exit); break;
             case Direction.Down: tile.ChangeWall(Direction.Down, ExitDoor, TypeWall.Exit); break;
         }
+        Transform exit = GameMath.FindComponentInChildWithTag<Transform>(tile.gameObject, "Finish");
+        OnSetExit?.Invoke(exit);
     }
     public void CreateStart(TileEntity tile, Direction dir)
     {
@@ -297,6 +352,8 @@ public class ProceduralGenerationLevel : MonoBehaviour
             case Direction.Up: tile.ChangeWall(Direction.Up, StartDoor, TypeWall.Start); break;
             case Direction.Down: tile.ChangeWall(Direction.Down, StartDoor, TypeWall.Start); break;
         }
+        Transform start = GameMath.FindComponentInChildWithTag<Transform>(tile.gameObject, "Respawn");
+        OnSetStart?.Invoke(start);
     }
     public EntityWall SelectEnter()
     {

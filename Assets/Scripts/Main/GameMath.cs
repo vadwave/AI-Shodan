@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public static class GameMath
@@ -106,6 +107,8 @@ public static class GameMath
         Debug.DrawLine(objectTransform.position,  (Quaternion.Euler(0, 0, -viewAngle) * line) + objectTransform.position, Color.blue);
         Debug.DrawLine(objectTransform.position,  (Quaternion.Euler(0, 0, viewAngle) * line) + objectTransform.position, Color.yellow);
         Debug.DrawLine(objectTransform.position, (line) + objectTransform.position, Color.green);
+        DrawEllipse(objectTransform.position, objectTransform.forward, objectTransform.up, radius * objectTransform.localScale.x, radius * objectTransform.localScale.y, viewAngle, 64, Color.green);
+
 
         Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(objectTransform.position, radius, curTargetMask);
         for (int i = 0; i < targetsInViewRadius.Length; i++)
@@ -116,7 +119,36 @@ public static class GameMath
         return visibleTargets;
     }
 
-    static Transform CheckTarget(Transform objectTransform, Transform target, float viewAngle)
+    private static void DrawEllipse(Vector3 pos, Vector3 forward, Vector3 up, float radiusX, float radiusY,float viewAngle, int segments, Color color, float duration = 0)
+    {
+        float angle = 0f;
+        float angle2 = 0f;
+        Quaternion rot = Quaternion.LookRotation(forward, up);
+        Vector3 lastPoint = Vector3.zero;
+        Vector3 thisPoint = Vector3.zero;
+        Vector3 thisPoint2 = Vector3.zero;
+
+        for (int i = 0; i < segments + 1; i++)
+        {
+            thisPoint.x = Mathf.Sin(Mathf.Deg2Rad * angle) * radiusX;
+            thisPoint.y = Mathf.Cos(Mathf.Deg2Rad * angle) * radiusY;
+
+            thisPoint2.x = Mathf.Sin(Mathf.Deg2Rad * angle2) * radiusX;
+            thisPoint2.y = Mathf.Cos(Mathf.Deg2Rad * angle2) * radiusY;
+
+            if (i > 0)
+            {
+                Debug.DrawLine(rot * lastPoint + pos, rot * thisPoint + pos, color, duration);
+                Debug.DrawLine(rot * lastPoint + pos, rot * thisPoint2 + pos, color, duration);
+            }
+
+            lastPoint = thisPoint;
+            angle += viewAngle / segments;
+            angle2 -= viewAngle / segments;
+        }
+    }
+
+        static Transform CheckTarget(Transform objectTransform, Transform target, float viewAngle)
     {
         Vector2 dirToTarget = (target.position - objectTransform.position).normalized;
         Debug.DrawRay(objectTransform.position, dirToTarget, Color.red); // Debug
@@ -133,4 +165,27 @@ public static class GameMath
     }
 
     #endregion
+
+
+    public static T FindComponentInChildWithTag<T>(this GameObject parent, string tag) where T : Component
+    {
+        Transform t = parent.transform;
+        foreach (Transform tr in t)
+        {
+            foreach (Transform tra in tr)
+            {
+                foreach (Transform tran in tra)
+                {
+                    foreach (Transform trans in tran)
+                    {
+                        if (trans.tag == tag)
+                        {
+                            return trans.GetComponent<T>();
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

@@ -139,6 +139,10 @@ public class TileEntity : MonoBehaviour
         }
         return false;
     }
+    public void ClearObjects()
+    {
+        ClearChildrens(ParentOjects);
+    }
 
     void ClearWalls()
     {

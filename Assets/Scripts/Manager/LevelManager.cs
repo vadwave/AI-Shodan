@@ -5,33 +5,86 @@ using UnityEngine;
 public class LevelManager : MonoBehaviour
 {
     ProceduralGenerationLevel level;
+
+    public Transform exit;
+    public Transform start;
+    [SerializeField] GameObject playerPrefab;
+
+    Player player;
+
+
     private void Awake()
     {
         level = this.GetComponent<ProceduralGenerationLevel>();
-        level.OnLevelBuild += EnableEnemies;
+        level.OnLevelBuild += ActivateEnemies;
+        level.OnSetStart += SetStart;
+        level.OnSetExit += SetExit;
+        InstantiatePlayer();
     }
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+
     private void OnDestroy()
     {
-        level.OnLevelBuild -= EnableEnemies;
+        level.OnLevelBuild -= ActivateEnemies;
+        level.OnSetStart -= SetStart;
+        level.OnSetExit -= SetExit;
+        player.OnRespawn -= Respawn;
+        player.OnEscaped -= DestroyLevel;
     }
 
-    // Update is called once per frame
-    void Update()
+    void InstantiatePlayer()
     {
-        
+        GameObject playerObject = Instantiate(playerPrefab, this.transform);
+        player = playerObject.GetComponentInChildren<Player>();
+        player.SetLevel(this);
+        player.OnRespawn += Respawn;
+        player.OnEscaped += DestroyLevel;
     }
 
-    void EnableEnemies()
+    void ActivateEnemies()
     {
        SecurityCamera[] cameras = level.GetComponentsInChildren<SecurityCamera>();
         foreach(SecurityCamera camera in cameras)
         {
             camera.ActivateAI(true);
         }
+    }
+    void DeactivateEnemies()
+    {
+        SecurityCamera[] cameras = level.GetComponentsInChildren<SecurityCamera>();
+        foreach (SecurityCamera camera in cameras)
+        {
+            camera.ActivateAI(false);
+        }
+    }
+    void SetExit(Transform exit)
+    {
+        this.exit = exit;
+    }
+    void SetStart(Transform start)
+    {
+        this.start = start;
+    }
+    void Respawn(Transform positionBody, Transform rotationBody)
+    {
+        level.Initialize();
+        Transform parent = this.start.parent.parent;
+
+        float angle = 90f + parent.eulerAngles.z;
+        Vector3 pos = -Vector3.up;
+        switch (angle)
+        {
+            case 180f: pos = -Vector3.up; break;
+            case 0f: pos = Vector3.up; break;
+            case -90f: pos = -Vector3.right; break;
+            case 90f: pos = Vector3.right; break;
+        }
+     
+        rotationBody.rotation = Quaternion.Euler(0f, 0f, angle);
+        positionBody.position = this.start.position + pos;
+    }
+    void DestroyLevel()
+    {
+        DeactivateEnemies();
+        level.DestroyMaze();
     }
 }

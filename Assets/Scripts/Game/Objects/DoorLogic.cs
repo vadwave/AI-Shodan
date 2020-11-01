@@ -22,7 +22,7 @@ public class DoorLogic : MonoBehaviour
     {
         if (isLocked)
         {
-            IPocket pocket = collision.transform.parent.GetComponent<IPocket>();
+            IPocket pocket = collision.transform.GetComponent<IPocket>();
             bool isOpen = pocket.UseKey();
             isLocked = !isOpen;
             return isOpen;
@@ -31,7 +31,7 @@ public class DoorLogic : MonoBehaviour
     }
     bool DetectCharacter(Collider2D collision)
     {
-        IMovable character = collision.transform.parent.GetComponent<IMovable>();
+        IMovable character = collision.transform.GetComponent<IMovable>();
         if (character != null) return true;
         else return false;
     }

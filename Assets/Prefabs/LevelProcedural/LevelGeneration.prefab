@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3984434898994684362}
   - component: {fileID: 3788332990603361097}
+  - component: {fileID: 65508336}
   m_Layer: 0
   m_Name: LevelGeneration
   m_TagString: Untagged
@@ -45,6 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sizeMaze: {x: 10, y: 10}
   seed: 12345
+  isRandom: 0
   prefab: {fileID: 5586248177934122729, guid: 042b9a5ffb30f074c98987a758ef4af7, type: 3}
   tileSize: 3.84
   Wall: {fileID: 2182361588382823221, guid: 12b78892503a0fe4d8cfd860b9dc6f1f, type: 3}
@@ -54,17 +56,18 @@ MonoBehaviour:
   Door:
     Prefab: {fileID: 870899931891132868, guid: a29b9b73af23ede4ca5754b31c246858, type: 3}
     Chance: 0.19
+  countEnemies: 5
   Camera:
-    Prefab: {fileID: 0}
-    Chance: 0
+    Prefab: {fileID: 9075203220895859903, guid: 788565cec16fb12458509926257b3147, type: 3}
+    Chance: 0.867
   Guard:
-    Prefab: {fileID: 0}
+    Prefab: {fileID: 4714100407222857362, guid: b95bbd9f638fa6043a0766e51a8a8260, type: 3}
     Chance: 0
   InfoFile:
-    Prefab: {fileID: 0}
+    Prefab: {fileID: 3352286711809907188, guid: b5d69a6bb87b39540adaa81d26a3f1f4, type: 3}
     Chance: 0
-  ExitDoor: {fileID: 0}
-  StartDoor: {fileID: 0}
+  ExitDoor: {fileID: 870899931891132868, guid: e20899b07947fb849a4eacbdb996595c, type: 3}
+  StartDoor: {fileID: 870899931891132868, guid: 154a7ebc6cd83d2449434acfd17dbf22, type: 3}
   Portal:
     EnterPrefab: {fileID: 0}
     ExitPrefab: {fileID: 0}
@@ -73,3 +76,18 @@ MonoBehaviour:
     DoorPrefab: {fileID: 0}
     KeyPrefab: {fileID: 0}
     Chance: 0
+--- !u!114 &65508336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067470146458948169}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72ea01b0221aa804fbe2655b086165ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  exit: {fileID: 0}
+  start: {fileID: 0}
+  playerPrefab: {fileID: 1512385078699942405, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
