@@ -9,7 +9,7 @@ public static class GameMath
     static LayerMask targetMask;
     static LayerMask guardMask;
     static LayerMask obstacleMask;
-    
+
 
     public static void Initialize(LayerMask obstacleMask, LayerMask targetMask, LayerMask guardMask)
     {
@@ -102,13 +102,14 @@ public static class GameMath
         LayerMask curTargetMask = targetMask;
         if (isThief) curTargetMask = guardMask;
 
-        var line = (objectTransform.up * radius);
-
-        Debug.DrawLine(objectTransform.position,  (Quaternion.Euler(0, 0, -viewAngle) * line) + objectTransform.position, Color.blue);
-        Debug.DrawLine(objectTransform.position,  (Quaternion.Euler(0, 0, viewAngle) * line) + objectTransform.position, Color.yellow);
-        Debug.DrawLine(objectTransform.position, (line) + objectTransform.position, Color.green);
-        DrawEllipse(objectTransform.position, objectTransform.forward, objectTransform.up, radius * objectTransform.localScale.x, radius * objectTransform.localScale.y, viewAngle, 64, Color.green);
-
+        if (Utils.Instance.DebugMode)
+        {
+            var line = (objectTransform.up * radius);
+            Debug.DrawLine(objectTransform.position, (Quaternion.Euler(0, 0, -viewAngle) * line) + objectTransform.position, Color.blue);
+            Debug.DrawLine(objectTransform.position, (Quaternion.Euler(0, 0, viewAngle) * line) + objectTransform.position, Color.yellow);
+            Debug.DrawLine(objectTransform.position, (line) + objectTransform.position, Color.green);
+            DrawEllipse(objectTransform.position, objectTransform.forward, objectTransform.up, radius * objectTransform.localScale.x, radius * objectTransform.localScale.y, viewAngle, 64, Color.green);
+        }
 
         Collider2D[] targetsInViewRadius = Physics2D.OverlapCircleAll(objectTransform.position, radius, curTargetMask);
         for (int i = 0; i < targetsInViewRadius.Length; i++)
@@ -119,7 +120,7 @@ public static class GameMath
         return visibleTargets;
     }
 
-    private static void DrawEllipse(Vector3 pos, Vector3 forward, Vector3 up, float radiusX, float radiusY,float viewAngle, int segments, Color color, float duration = 0)
+    static void DrawEllipse(Vector3 pos, Vector3 forward, Vector3 up, float radiusX, float radiusY, float viewAngle, int segments, Color color, float duration = 0)
     {
         float angle = 0f;
         float angle2 = 0f;
@@ -148,10 +149,15 @@ public static class GameMath
         }
     }
 
-        static Transform CheckTarget(Transform objectTransform, Transform target, float viewAngle)
+    static Transform CheckTarget(Transform objectTransform, Transform target, float viewAngle)
     {
         Vector2 dirToTarget = (target.position - objectTransform.position).normalized;
-        Debug.DrawRay(objectTransform.position, dirToTarget, Color.red); // Debug
+
+        if (Utils.Instance.DebugMode)
+        {
+            Debug.DrawRay(objectTransform.position, dirToTarget, Color.red); // Debug
+        }
+
         float angle = Vector2.Angle(objectTransform.up, dirToTarget);
         if (angle < viewAngle)
         {

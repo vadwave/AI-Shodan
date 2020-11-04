@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.MLAgents;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -23,6 +24,7 @@ public class ProceduralGenerationLevel : MonoBehaviour
     [SerializeField] SpawnPrefab Camera;
     [SerializeField] SpawnPrefab Guard;
     [Header("Element Collectibles")]
+    [SerializeField] int countCollectables = 5;
     [SerializeField] SpawnPrefab InfoFile;
     [Header("Element Logics")]
     [SerializeField] GameObject ExitDoor;
@@ -65,7 +67,7 @@ public class ProceduralGenerationLevel : MonoBehaviour
 
     private void GenerateCollectables()
     {
-        for (int i = 0; i < countEnemies; i++)
+        for (int i = 0; i < countCollectables; i++)
         {
             int x = Random.Range(0, sizeMaze.x - 1);
             int y = Random.Range(0, sizeMaze.y - 1);
@@ -144,6 +146,25 @@ public class ProceduralGenerationLevel : MonoBehaviour
         GenerateCollectables();
         GenerateEnemies();
         OnLevelBuild.Invoke();
+    }
+
+    public void SetResetParameters(EnvironmentParameters resetParams)
+    {
+        if(resetParams!= null)
+        {
+            countEnemies = (int)resetParams.GetWithDefault("enemies", countEnemies);
+            countCollectables = (int)resetParams.GetWithDefault("collectables", countCollectables);
+
+            float random = (isRandom) ? 1f : 0f;
+            random = resetParams.GetWithDefault("randomLevel", random);
+            isRandom = (random == 0) ? false : true;
+
+            sizeMaze.x = (int)resetParams.GetWithDefault("sizeLevel", sizeMaze.x);
+            sizeMaze.y = (int)resetParams.GetWithDefault("sizeLevel", sizeMaze.y);
+
+            Passage.Chance = resetParams.GetWithDefault("chancePassage", Passage.Chance);
+            Door.Chance = resetParams.GetWithDefault("chanceDoor", Door.Chance);
+        }
     }
 
     public void CreateLayout()

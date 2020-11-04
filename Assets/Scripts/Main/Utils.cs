@@ -6,6 +6,10 @@ public class Utils : Singleton<Utils>
     [SerializeField] LayerMask guardMask;
     [SerializeField] LayerMask obstacleMask;
     [SerializeField] Camera main;
+    [SerializeField] bool isDebug;
+
+    public bool DebugMode => isDebug;
+
     // Start is called before the first frame update
     void Start()
     {

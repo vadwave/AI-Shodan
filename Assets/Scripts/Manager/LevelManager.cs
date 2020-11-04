@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.MLAgents;
 using UnityEngine;
 
 public class LevelManager : MonoBehaviour
@@ -86,5 +88,10 @@ public class LevelManager : MonoBehaviour
     {
         DeactivateEnemies();
         level.DestroyMaze();
+    }
+
+    public void SetParameters(EnvironmentParameters resetParams)
+    {
+        level.SetResetParameters(resetParams);
     }
 }

@@ -25,7 +25,6 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     const float timeDelay = 0.0f;
     private bool isWaiting = false;
-    float reward = 0;
     float scores = 0;
     int keys = 0;
 
@@ -34,6 +33,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     LevelManager level;
 
+    EnvironmentParameters resetParams;
 
 
     public float Health => health;
@@ -54,14 +54,15 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     public override void Initialize()
     {
         base.Initialize();
+        resetParams = Academy.Instance.EnvironmentParameters;
+        SetResetParameters();
     }
     public override void OnEpisodeBegin()
     {
         base.OnEpisodeBegin();
         keys = 0;
         scores = 0;
-        reward = 0;
-
+        SetResetParameters();
         Respawn();
     }
     public override void Heuristic(float[] actionsOut)
@@ -85,6 +86,27 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
             if (rigBody) sensor.AddObservation(rigBody.velocity.normalized);
             sensor.AddObservation(body.rotation.eulerAngles.normalized);
             if (level.exit) sensor.AddObservation((rigBody.transform.position - level.exit.position).normalized);
+        }
+
+    }
+
+    void SetResetParameters()
+    {
+        if (resetParams != null)
+        {
+            moveSpeed = resetParams.GetWithDefault("moveSpeed", moveSpeed);
+            rotateSpeed = resetParams.GetWithDefault("rotateSpeed", rotateSpeed);
+
+            viewAngle = (int)resetParams.GetWithDefault("viewAngle", viewAngle);
+            viewDistance = resetParams.GetWithDefault("viewDistance", viewDistance);
+            if (level)
+            {
+                level.SetParameters(resetParams);
+            }
+            else
+            {
+                this.transform.root.GetComponent<LevelManager>().SetParameters(resetParams);
+            }
         }
 
     }
@@ -161,25 +183,25 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         {
             if (target.GetComponent<SecurityCamera>())
             {
-                reward -= Rewards.Check;
+                AddReward(-Rewards.Check);
             }
             else if (target.GetComponent<Guard>())
             {
-                reward -= Rewards.Check;
+                AddReward(- Rewards.Check);
             }
             else if (target.GetComponent<CollectLogic>())
             {
-                reward += Rewards.Check;
+                AddReward(Rewards.Check);
             }
             else if (target.GetComponent<KeyLogic>())
             {
-                reward += Rewards.Check;
+                AddReward(Rewards.Check);
             }
         }
     }
     void OnVisiblePlayer()
     {
-        reward -= Rewards.Visible;
+        AddReward(-Rewards.Visible);
     }
 
     #endregion
@@ -260,7 +282,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         if (Keys > 0)
         {
             keys--;
-            reward += Rewards.Key;
+            AddReward(Rewards.Key);
             return true;
         }
         return false;
@@ -269,13 +291,13 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     public void AddKey()
     {
         keys++;
-        reward += Rewards.Key;
+        AddReward(Rewards.Key);
     }
 
     public void Collect()
     {
         scores++;
-        reward += Rewards.Collectable;
+        AddReward(Rewards.Collectable);
     }
 
     #endregion
