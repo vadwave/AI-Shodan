@@ -47,6 +47,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
 
     public event Action<Transform, Transform> OnRespawn;
+    public event Action OnEndedRespawn;
     public event Action OnEscaped;
 
     #region Agent
@@ -235,6 +236,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         isWaiting = true;
         yield return new WaitForSeconds(delay);
         isWaiting = false;
+        OnEndedRespawn?.Invoke();
         yield return null;
     }
 

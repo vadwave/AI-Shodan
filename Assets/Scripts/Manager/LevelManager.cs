@@ -7,11 +7,12 @@ using UnityEngine;
 public class LevelManager : MonoBehaviour
 {
     ProceduralGenerationLevel level;
+    TimerManager timer;
 
     public Transform exit;
     public Transform start;
     [SerializeField] GameObject playerPrefab;
-
+    [SerializeField] float maxMinutes;
     Player player;
 
 
@@ -22,6 +23,10 @@ public class LevelManager : MonoBehaviour
         level.OnSetStart += SetStart;
         level.OnSetExit += SetExit;
         InstantiatePlayer();
+        timer = this.GetComponent<TimerManager>();
+        timer.SetMax(maxMinutes);
+        timer.OnEnded += NonEscaped;
+
     }
 
     private void OnDestroy()
@@ -29,8 +34,10 @@ public class LevelManager : MonoBehaviour
         level.OnLevelBuild -= ActivateEnemies;
         level.OnSetStart -= SetStart;
         level.OnSetExit -= SetExit;
+        timer.OnEnded -= NonEscaped;
         player.OnRespawn -= Respawn;
         player.OnEscaped -= DestroyLevel;
+        player.OnEndedRespawn -= ResetTimer;
     }
 
     void InstantiatePlayer()
@@ -40,6 +47,7 @@ public class LevelManager : MonoBehaviour
         player.SetLevel(this);
         player.OnRespawn += Respawn;
         player.OnEscaped += DestroyLevel;
+        player.OnEndedRespawn += ResetTimer;
     }
 
     void ActivateEnemies()
@@ -58,6 +66,17 @@ public class LevelManager : MonoBehaviour
             camera.ActivateAI(false);
         }
     }
+
+    void NonEscaped()
+    {
+        if(player)
+        player.ExitLevel(false);
+    }
+    void ResetTimer()
+    {
+        timer.ResetTimer();
+    }
+
     void SetExit(Transform exit)
     {
         this.exit = exit;
