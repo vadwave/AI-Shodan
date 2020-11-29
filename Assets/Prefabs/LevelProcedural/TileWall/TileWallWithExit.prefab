@@ -164,6 +164,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 870899931891132869}
     m_Modifications:
+    - target: {fileID: 1616414407827793817, guid: a7b98ce7ffc0d4b44971c53e22145369, type: 3}
+      propertyPath: m_TagString
+      value: ExitDoor
+      objectReference: {fileID: 0}
     - target: {fileID: 4841508162000973191, guid: a7b98ce7ffc0d4b44971c53e22145369, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

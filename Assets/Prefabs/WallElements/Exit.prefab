@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4973845427766692744}
   m_Layer: 8
   m_Name: Body
-  m_TagString: Untagged
+  m_TagString: ExitDoor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

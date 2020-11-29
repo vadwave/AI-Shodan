@@ -1,0 +1,56 @@
+resampling-interval: 5000
+
+enemies:
+    sampler-type: "uniform"
+    min_value: 0
+    max_value: 10
+
+collectables:
+    sampler-type: "uniform"
+    min_value: 5
+    max_value: 15
+
+randomLevel:
+    sampler-type: "uniform"
+    min_value: 0
+    max_value: 1000000
+
+chancePassage:
+    sampler-type: "uniform"
+    min_value: 0
+    max_value: 1
+
+chanceDoor:
+    sampler-type: "uniform"
+    min_value: 0
+    max_value: 1
+
+sizeLevel_X:
+    sampler-type: "uniform"
+    min_value: 4
+    max_value: 10
+
+sizeLevel_Y:
+    sampler-type: "uniform"
+    min_value: 4
+    max_value: 10
+
+moveSpeed:
+    sampler-type: "uniform"
+    min_value: 7.55
+    max_value: 10
+
+rotateSpeed:
+    sampler-type: "uniform"
+    min_value: 7.55
+    max_value: 10
+
+viewAngle:
+    sampler-type: "uniform"
+    min_value: 35
+    max_value: 100
+
+viewDistance:
+    sampler-type: "uniform"
+    min_value: 3.4
+    max_value: 4

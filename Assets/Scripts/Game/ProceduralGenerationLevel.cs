@@ -159,8 +159,8 @@ public class ProceduralGenerationLevel : MonoBehaviour
             random = resetParams.GetWithDefault("randomLevel", random);
             isRandom = (random == 0) ? false : true;
 
-            sizeMaze.x = (int)resetParams.GetWithDefault("sizeLevel", sizeMaze.x);
-            sizeMaze.y = (int)resetParams.GetWithDefault("sizeLevel", sizeMaze.y);
+            sizeMaze.x = (int)resetParams.GetWithDefault("sizeLevel_X", sizeMaze.x);
+            sizeMaze.y = (int)resetParams.GetWithDefault("sizeLevel_Y", sizeMaze.y);
 
             Passage.Chance = resetParams.GetWithDefault("chancePassage", Passage.Chance);
             Door.Chance = resetParams.GetWithDefault("chanceDoor", Door.Chance);

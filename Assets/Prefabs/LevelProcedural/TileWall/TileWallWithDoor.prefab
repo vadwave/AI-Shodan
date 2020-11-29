@@ -102,6 +102,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 870899931891132869}
     m_Modifications:
+    - target: {fileID: 1616414407827793817, guid: 966b10954b7d82540ba2fb9b9d77fb32, type: 3}
+      propertyPath: m_TagString
+      value: Door
+      objectReference: {fileID: 0}
     - target: {fileID: 4841508162000973191, guid: 966b10954b7d82540ba2fb9b9d77fb32, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -149,6 +153,10 @@ PrefabInstance:
     - target: {fileID: 4841508162000973193, guid: 966b10954b7d82540ba2fb9b9d77fb32, type: 3}
       propertyPath: m_Name
       value: Door
+      objectReference: {fileID: 0}
+    - target: {fileID: 4841508162000973193, guid: 966b10954b7d82540ba2fb9b9d77fb32, type: 3}
+      propertyPath: m_TagString
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 966b10954b7d82540ba2fb9b9d77fb32, type: 3}

@@ -42,7 +42,7 @@ public class LevelManager : MonoBehaviour
 
     void InstantiatePlayer()
     {
-        GameObject playerObject = Instantiate(playerPrefab, this.transform);
+        GameObject playerObject = playerPrefab;// Instantiate(playerPrefab, this.transform);
         player = playerObject.GetComponentInChildren<Player>();
         player.SetLevel(this);
         player.OnRespawn += Respawn;
@@ -111,6 +111,7 @@ public class LevelManager : MonoBehaviour
 
     public void SetParameters(EnvironmentParameters resetParams)
     {
+        if(resetParams!=null && level)
         level.SetResetParameters(resetParams);
     }
 }

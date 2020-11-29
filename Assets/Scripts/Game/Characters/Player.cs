@@ -30,6 +30,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
 
     Coroutine corFind;
+    Coroutine corCheckPos;
 
     LevelManager level;
 
@@ -84,10 +85,16 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         base.CollectObservations(sensor);
         if (sensor != null)
         {
-            if (rigBody) sensor.AddObservation(rigBody.velocity.normalized);
-            sensor.AddObservation(body.rotation.eulerAngles.normalized);
+            if (rigBody)
+            {
+                sensor.AddObservation(rigBody.velocity.normalized.x);
+                sensor.AddObservation(rigBody.velocity.normalized.y);
+
+            }
+            sensor.AddObservation(body.rotation.eulerAngles.normalized.z);
             if (level.exit) sensor.AddObservation((rigBody.transform.position - level.exit.position).normalized);
         }
+      
 
     }
 
@@ -125,6 +132,10 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         GetDirection(vectorAction, out dir, out angleRotate);
         Vector2 pos = rigBody.transform.position + dir * Time.deltaTime;
         rigBody.MovePosition(pos);
+        if (angleRotate <= 1)
+        {
+            angleRotate *= 360f;
+        }
         body.rotation = Quaternion.Lerp(body.rotation, Quaternion.Euler(0,0,-angleRotate), rotateSpeed * Time.deltaTime);
     }
     void InputControl(ref float[] actionsOut)
@@ -184,19 +195,23 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         {
             if (target.GetComponent<SecurityCamera>())
             {
-                AddReward(-Rewards.Check);
+                AddReward(- Rewards.Check);
+                Debug.Log("Find Camera score: -" + Rewards.Check);
             }
             else if (target.GetComponent<Guard>())
             {
                 AddReward(- Rewards.Check);
+                Debug.Log("Find Guard score: -" + Rewards.Check);
             }
             else if (target.GetComponent<CollectLogic>())
             {
                 AddReward(Rewards.Check);
+                Debug.Log("Find CollectLogic score: +" + Rewards.Check);
             }
             else if (target.GetComponent<KeyLogic>())
             {
                 AddReward(Rewards.Check);
+                Debug.Log("Find KeyLogic score: +" + Rewards.Check);
             }
         }
     }
@@ -238,6 +253,27 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         isWaiting = false;
         OnEndedRespawn?.Invoke();
         yield return null;
+        if(corCheckPos==null)
+        corCheckPos = StartCoroutine(IECheckPosition(1f));
+    }
+
+    IEnumerator IECheckPosition(float delay)
+    {
+        while (true)
+        {
+            Vector3 lastPos = body.position;
+            yield return new WaitForSeconds(delay);
+            Vector3 currentPos = body.position;
+            Vector2 minSize = new Vector2(lastPos.x-1, lastPos.y-1);
+            Vector2 maxSize = new Vector2(lastPos.x+1, lastPos.y+1);
+            if (((minSize.x <= currentPos.x) && (currentPos.x <= maxSize.x)) &&
+                ((minSize.y <= currentPos.y) && (currentPos.y <= maxSize.y)))
+            {
+                AddReward(-Rewards.Check);
+                //Debug.Log("ALARM! Change Position!");
+            }
+            yield return null;
+        }
     }
 
     #endregion
@@ -247,6 +283,9 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     public void ExitLevel(bool success = true)
     {
+        if(corCheckPos!=null)
+        StopCoroutine(corCheckPos);
+        corCheckPos = null;
         OnEscaped?.Invoke();
         float tempReward = (success) ? Rewards.Win : -Rewards.Win;
         SetReward(tempReward);
@@ -273,6 +312,24 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         if (collision.gameObject.tag == "Finish")
         {
             ExitLevel();
+        }
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.transform.tag == "Wall")
+        {
+            AddReward(-(Rewards.Check * 2));
+           // Debug.Log("Collision score: -" + Rewards.Check*2);
+        }
+
+
+    }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.transform.tag == "Wall")
+        {
+            AddReward(Rewards.Check);
+           // Debug.Log("Collision score: +" + Rewards.Check);
         }
     }
 
