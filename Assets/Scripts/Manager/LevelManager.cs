@@ -27,6 +27,8 @@ public class LevelManager : MonoBehaviour
         timer.SetMax(maxMinutes);
         timer.OnEnded += NonEscaped;
 
+        SecurityCamera.OnAddedTimeVisible += AddedTimeVisible;
+
     }
 
     private void OnDestroy()
@@ -35,9 +37,12 @@ public class LevelManager : MonoBehaviour
         level.OnSetStart -= SetStart;
         level.OnSetExit -= SetExit;
         timer.OnEnded -= NonEscaped;
+        player.OnAddedScore -= UpdateScore;
         player.OnRespawn -= Respawn;
         player.OnEscaped -= DestroyLevel;
         player.OnEndedRespawn -= ResetTimer;
+
+        SecurityCamera.OnAddedTimeVisible -= AddedTimeVisible;
     }
 
     void InstantiatePlayer()
@@ -45,9 +50,15 @@ public class LevelManager : MonoBehaviour
         GameObject playerObject = playerPrefab;// Instantiate(playerPrefab, this.transform);
         player = playerObject.GetComponentInChildren<Player>();
         player.SetLevel(this);
+        player.OnAddedScore += UpdateScore;
         player.OnRespawn += Respawn;
         player.OnEscaped += DestroyLevel;
         player.OnEndedRespawn += ResetTimer;
+    }
+
+    private void UpdateScore(float scoreValues)
+    {
+        timer.Score = scoreValues;
     }
 
     void ActivateEnemies()
@@ -113,5 +124,9 @@ public class LevelManager : MonoBehaviour
     {
         if(resetParams!=null && level)
         level.SetResetParameters(resetParams);
+    }
+    void AddedTimeVisible(float values)
+    {
+        timer.TimeVisible += values;
     }
 }

@@ -50,7 +50,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     public event Action<Transform, Transform> OnRespawn;
     public event Action OnEndedRespawn;
     public event Action OnEscaped;
-
+    public event Action<float> OnAddedScore;
     #region Agent
 
     public override void Initialize()
@@ -132,10 +132,6 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         GetDirection(vectorAction, out dir, out angleRotate);
         Vector2 pos = rigBody.transform.position + dir * Time.deltaTime;
         rigBody.MovePosition(pos);
-        if (angleRotate <= 1)
-        {
-            angleRotate *= 360f;
-        }
         body.rotation = Quaternion.Lerp(body.rotation, Quaternion.Euler(0,0,-angleRotate), rotateSpeed * Time.deltaTime);
     }
     void InputControl(ref float[] actionsOut)
@@ -357,6 +353,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     {
         scores++;
         AddReward(Rewards.Collectable);
+        OnAddedScore?.Invoke(scores);
     }
 
     #endregion

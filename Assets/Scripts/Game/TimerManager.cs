@@ -10,10 +10,16 @@ public class TimerManager : MonoBehaviour
     [SerializeField] Text timePreviousCounter;
     [SerializeField] Text timeBestCounter;
 
+    float visibleTimes;
+    float score;
     float starttime;
     float maxMinutes = 999f;
     TimeEntity bestTime = new TimeEntity { min = 10, sec = 10, fraction = 10 };
     TimeEntity time = new TimeEntity { min = 11, sec = 10, fraction = 10 };
+
+    public float Score { set { score = value; } }
+
+    public float TimeVisible { get { return visibleTimes; } set { visibleTimes = value; } }
 
     public event System.Action OnEnded;
 
@@ -33,6 +39,8 @@ public class TimerManager : MonoBehaviour
         BestTimeUpdate();
         if (timeCounter && timePreviousCounter) timePreviousCounter.text = timeCounter.text;
         starttime = Time.time;
+        score = 0;
+        visibleTimes = 0;
     }
     void BestTimeUpdate()
     {
@@ -55,7 +63,7 @@ public class TimerManager : MonoBehaviour
             bestTime.min = 10;
         }
 
-        if (timeBestCounter) timeBestCounter.text = String.Format("{0:00}:{1:00}:{2:00}", bestTime.min, bestTime.sec, bestTime.fraction);
+        if (timeBestCounter) timeBestCounter.text = String.Format("{0:00}:{1:00}:{2:00}", bestTime.min, bestTime.sec, bestTime.fraction) + " Collect: " + score.ToString() + " V: " + string.Format("{0:0.##}", visibleTimes);
 
     }
     void UpdateTime()
@@ -66,7 +74,7 @@ public class TimerManager : MonoBehaviour
         float fraction = ((timecount * 10) % 10);
         time = new TimeEntity { min = min, sec = sec, fraction = fraction };
 
-        if(timeCounter) timeCounter.text = String.Format("{0:00}:{1:00}:{2:00}", time.min, time.sec, time.fraction);
+        if(timeCounter) timeCounter.text = String.Format("{0:00}:{1:00}:{2:00}", time.min, time.sec, time.fraction) + " Collect: " + score.ToString() + " V: " + string.Format("{0:0.##}", visibleTimes);
 
         if (time.min >= maxMinutes)
         {
