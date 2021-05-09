@@ -123,8 +123,8 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
     }
     public void Alert(bool enable)
     {
-        if (enable) { corRotate = StartCoroutine(IETargetLock()); StartWaitingTarget(); }
-        else { StopCoroutine(corRotate); StopWaitingTarget(); }
+        if (enable) { corRotate = StartCoroutine(IETargetLock()); StartWaitingTarget(); OnFindedTarget?.Invoke(); }
+        else { StopCoroutine(corRotate); StopWaitingTarget(); OnLostedTarget?.Invoke(); }
         Find(enable);
     }
 
@@ -132,6 +132,8 @@ public class SecurityCamera : MonoBehaviour, IEye, IPatroling, IRotable
     #endregion
 
     public static event Action<float> OnAddedTimeVisible;
+    public static event Action OnFindedTarget;
+    public static event Action OnLostedTarget;
     Coroutine corWaitTarget;
     bool isTargetVisible=false;
     void StartWaitingTarget()

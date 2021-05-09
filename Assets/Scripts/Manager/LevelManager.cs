@@ -13,6 +13,7 @@ public class LevelManager : MonoBehaviour
     public Transform start;
     [SerializeField] GameObject playerPrefab;
     [SerializeField] float maxMinutes;
+    [SerializeField] Shodan shodan;
     Player player;
 
 
@@ -24,10 +25,23 @@ public class LevelManager : MonoBehaviour
         level.OnSetExit += SetExit;
         InstantiatePlayer();
         timer = this.GetComponent<TimerManager>();
-        timer.SetMax(maxMinutes);
-        timer.OnEnded += NonEscaped;
+        if (timer)
+        {
+            timer.SetMax(maxMinutes);
+            timer.OnEnded += NonEscaped;
+            player.OnEndedRespawn += ResetTimer;
+        }
 
-        SecurityCamera.OnAddedTimeVisible += AddedTimeVisible;
+
+        if (shodan)
+        {
+            SecurityCamera.OnAddedTimeVisible += AddedTimeVisible;
+            SecurityCamera.OnFindedTarget += shodan.FindTarget;
+            SecurityCamera.OnLostedTarget += shodan.LostTarget;
+            player.OnRespawn += shodan.StartEscaping;
+            player.OnEscaped += shodan.Result;
+            player.OnAddedScore += shodan.CollectInfo;
+        }
 
     }
 
@@ -36,6 +50,7 @@ public class LevelManager : MonoBehaviour
         level.OnLevelBuild -= ActivateEnemies;
         level.OnSetStart -= SetStart;
         level.OnSetExit -= SetExit;
+        if(timer)
         timer.OnEnded -= NonEscaped;
         player.OnAddedScore -= UpdateScore;
         player.OnRespawn -= Respawn;
@@ -53,12 +68,12 @@ public class LevelManager : MonoBehaviour
         player.OnAddedScore += UpdateScore;
         player.OnRespawn += Respawn;
         player.OnEscaped += DestroyLevel;
-        player.OnEndedRespawn += ResetTimer;
+
     }
 
     private void UpdateScore(float scoreValues)
     {
-        timer.Score = scoreValues;
+        if (timer) timer.Score = scoreValues;
     }
 
     void ActivateEnemies()

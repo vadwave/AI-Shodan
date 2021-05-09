@@ -35,7 +35,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     LevelManager level;
 
     EnvironmentParameters resetParams;
-
+    private float sumValue;
 
     public float Health => health;
     public float Speed => moveSpeed;
@@ -55,30 +55,35 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     public override void Initialize()
     {
-        base.Initialize();
+        //base.Initialize();
         resetParams = Academy.Instance.EnvironmentParameters;
         SetResetParameters();
     }
     public override void OnEpisodeBegin()
     {
-        base.OnEpisodeBegin();
+        //base.OnEpisodeBegin();
+        Debug.Log("Total Reward: " + sumValue.ToString());
         keys = 0;
         scores = 0;
+        sumValue = 0;
         SetResetParameters();
         Respawn();
     }
     public override void Heuristic(float[] actionsOut)
     {
-        base.Heuristic(actionsOut);
+        //base.Heuristic(actionsOut);
         //InputControl(ref actionsOut);
         InputControl(ref actionsOut);
 
     }
     public override void OnActionReceived(float[] vectorAction)
     {
-        base.OnActionReceived(vectorAction);
+        //base.OnActionReceived(vectorAction);
+        //Debug.Log(" X: " + vectorAction[0] + " Y: " + vectorAction[1] + " Z:" + vectorAction[2] + " W:" + vectorAction[3]);
         Move(vectorAction);
         Find(true);
+        AddReward(-1f / MaxStep);
+        sumValue += (-1f / MaxStep);
     }
     public override void CollectObservations(VectorSensor sensor)
     {
@@ -91,11 +96,25 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
                 sensor.AddObservation(rigBody.velocity.normalized.y);
 
             }
-            sensor.AddObservation(body.rotation.eulerAngles.normalized.z);
-            if (level.exit) sensor.AddObservation((rigBody.transform.position - level.exit.position).normalized);
+            sensor.AddObservation(body.rotation.normalized.z);//body.rotation.eulerAngles.normalized.z
+            sensor.AddObservation(body.rotation.normalized.w);
+            if (level.exit) 
+            {
+                Vector2 dirToExit = (level.exit.position - rigBody.transform.position).normalized;
+                //Debug.Log(dirToExit.ToString());
+                sensor.AddObservation(dirToExit.x);
+                sensor.AddObservation(dirToExit.y); 
+
+            }
         }
       
 
+    }
+    public void AddAgentReward(float value)
+    {
+        sumValue += value;
+        //Debug.Log("Add Reward: " + value.ToString());
+        AddReward(value);
     }
 
     void SetResetParameters()
@@ -128,11 +147,16 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     {
         if (isWaiting) return;
         Vector3 dir;
-        float angleRotate;
-        GetDirection(vectorAction, out dir, out angleRotate);
+        float angleRotate=0;
+        Quaternion quaternionAngle;
+        GetDirection(vectorAction, out dir, out quaternionAngle);
+        Quaternion old = Quaternion.Euler(0, 0, -angleRotate);
+
         Vector2 pos = rigBody.transform.position + dir * Time.deltaTime;
         rigBody.MovePosition(pos);
-        body.rotation = Quaternion.Lerp(body.rotation, Quaternion.Euler(0,0,-angleRotate), rotateSpeed * Time.deltaTime);
+
+
+        body.rotation = Quaternion.Lerp(body.rotation, quaternionAngle, rotateSpeed * Time.deltaTime);
     }
     void InputControl(ref float[] actionsOut)
     {
@@ -142,14 +166,19 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         Vector3 mousePos = Utils.Instance.GetPosMousePosition();
         Vector2 direction = (mousePos - transform.position).normalized;
         float angle = Mathf.Atan2(direction.x, direction.y) * Mathf.Rad2Deg;
-        actionsOut[2] = angle;
+        Quaternion eulerAngle = Quaternion.Euler(0, 0, -angle);
+        //float normalAngle = eulerAngle.z;
+        //actionsOut[2] = angle;
+        actionsOut[2] = eulerAngle.z;
+        actionsOut[3] = eulerAngle.w;
     }
-    void GetDirection(float[] vectorAction, out Vector3 dir, out float angleRotate)
+    void GetDirection(float[] vectorAction, out Vector3 dir, out Quaternion angleRotate)
     {
         dir = Vector3.zero;
         dir += rigBody.transform.up * vectorAction[0] * moveSpeed;
         dir += rigBody.transform.right * vectorAction[1] * moveSpeed;
-        angleRotate = vectorAction[2];
+        //angleRotate = vectorAction[2];
+        angleRotate = new Quaternion(0, 0, vectorAction[2], vectorAction[3]);
     }
 
     public void Move()
@@ -191,29 +220,29 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         {
             if (target.GetComponent<SecurityCamera>())
             {
-                AddReward(- Rewards.Check);
+                AddAgentReward(- Rewards.Check);
                 Debug.Log("Find Camera score: -" + Rewards.Check);
             }
             else if (target.GetComponent<Guard>())
             {
-                AddReward(- Rewards.Check);
+                AddAgentReward(- Rewards.Check);
                 Debug.Log("Find Guard score: -" + Rewards.Check);
             }
             else if (target.GetComponent<CollectLogic>())
             {
-                AddReward(Rewards.Check);
+                AddAgentReward(Rewards.Check);
                 Debug.Log("Find CollectLogic score: +" + Rewards.Check);
             }
             else if (target.GetComponent<KeyLogic>())
             {
-                AddReward(Rewards.Check);
+                AddAgentReward(Rewards.Check);
                 Debug.Log("Find KeyLogic score: +" + Rewards.Check);
             }
         }
     }
     void OnVisiblePlayer()
     {
-        AddReward(-Rewards.Visible);
+        AddAgentReward(-Rewards.Visible);
     }
 
     #endregion
@@ -265,7 +294,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
             if (((minSize.x <= currentPos.x) && (currentPos.x <= maxSize.x)) &&
                 ((minSize.y <= currentPos.y) && (currentPos.y <= maxSize.y)))
             {
-                AddReward(-Rewards.Check);
+                AddAgentReward(-Rewards.Check);
                 //Debug.Log("ALARM! Change Position!");
             }
             yield return null;
@@ -284,6 +313,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         corCheckPos = null;
         OnEscaped?.Invoke();
         float tempReward = (success) ? Rewards.Win : -Rewards.Win;
+        sumValue += (success) ? Rewards.Win : -Rewards.Win;
         SetReward(tempReward);
         EndEpisode();
     }
@@ -314,8 +344,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     {
         if (collision.transform.tag == "Wall")
         {
-            AddReward(-(Rewards.Check * 2));
-           // Debug.Log("Collision score: -" + Rewards.Check*2);
+            AddAgentReward(-(Rewards.Check * 2));
         }
 
 
@@ -324,8 +353,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     {
         if (collision.transform.tag == "Wall")
         {
-            AddReward(Rewards.Check);
-           // Debug.Log("Collision score: +" + Rewards.Check);
+            //AddAgentReward(Rewards.Check);
         }
     }
 
@@ -337,7 +365,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         if (Keys > 0)
         {
             keys--;
-            AddReward(Rewards.Key);
+            AddAgentReward(Rewards.Key);
             return true;
         }
         return false;
@@ -346,13 +374,13 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     public void AddKey()
     {
         keys++;
-        AddReward(Rewards.Key);
+        AddAgentReward(Rewards.Key);
     }
 
     public void Collect()
     {
         scores++;
-        AddReward(Rewards.Collectable);
+        AddAgentReward(Rewards.Collectable);
         OnAddedScore?.Invoke(scores);
     }
 

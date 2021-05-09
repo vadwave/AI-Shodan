@@ -1,5 +1,65 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &408616704133198594
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1737137447271149527}
+  - component: {fileID: 4071721130401011716}
+  m_Layer: 10
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1737137447271149527
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 408616704133198594}
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 754001744286105698}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
+--- !u!114 &4071721130401011716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 408616704133198594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f67c7e722ba14acd9153bb4488bff6e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SensorName: RayPerceptionSensor
+  m_DetectableTags:
+  - Wall
+  - Door
+  - Collectable
+  - Guard
+  - ExitDoor
+  m_RaysPerDirection: 4
+  m_MaxRayDegrees: 90
+  m_SphereCastRadius: 0.2
+  m_RayLength: 1.5
+  m_RayLayerMask:
+    serializedVersion: 2
+    m_Bits: 2816
+  m_ObservationStacks: 1
+  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
+  rayMissColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &2067470146458948169
 GameObject:
   m_ObjectHideFlags: 0
@@ -46,29 +106,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15c86b1969586b84e9603c4e3823a2c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sizeMaze: {x: 10, y: 10}
+  sizeMaze: {x: 6, y: 6}
   seed: 12345
-  isRandom: 0
+  isRandom: 1
   prefab: {fileID: 5586248177934122729, guid: 042b9a5ffb30f074c98987a758ef4af7, type: 3}
   tileSize: 3.84
   Wall: {fileID: 2182361588382823221, guid: 12b78892503a0fe4d8cfd860b9dc6f1f, type: 3}
   Passage:
     Prefab: {fileID: 4205294920119575701, guid: 65c14783305fa9d48b6d1cbe13a365ba, type: 3}
-    Chance: 0.12
+    Chance: 0.3
   Door:
     Prefab: {fileID: 870899931891132868, guid: a29b9b73af23ede4ca5754b31c246858, type: 3}
-    Chance: 0.19
+    Chance: 0.1
   countEnemies: 5
   Camera:
     Prefab: {fileID: 9075203220895859903, guid: 788565cec16fb12458509926257b3147, type: 3}
-    Chance: 0.867
+    Chance: 0.5
   Guard:
     Prefab: {fileID: 4714100407222857362, guid: b95bbd9f638fa6043a0766e51a8a8260, type: 3}
     Chance: 0
-  countCollectables: 5
+  countCollectables: 7
   InfoFile:
     Prefab: {fileID: 3352286711809907188, guid: b5d69a6bb87b39540adaa81d26a3f1f4, type: 3}
-    Chance: 0
+    Chance: 0.5
   ExitDoor: {fileID: 870899931891132868, guid: e20899b07947fb849a4eacbdb996595c, type: 3}
   StartDoor: {fileID: 870899931891132868, guid: 154a7ebc6cd83d2449434acfd17dbf22, type: 3}
   Portal:
@@ -95,6 +155,7 @@ MonoBehaviour:
   start: {fileID: 0}
   playerPrefab: {fileID: 748935617912600495}
   maxMinutes: 3
+  shodan: {fileID: 0}
 --- !u!114 &7751320368035244428
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,7 +184,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 654203167, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
       propertyPath: m_InstanceId
-      value: -1700
+      value: -550036
+      objectReference: {fileID: 0}
+    - target: {fileID: 2132101000, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
+      propertyPath: m_MaxRayDegrees
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 2132101000, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
+      propertyPath: m_RaysPerDirection
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2132101002, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2132101002, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
+      propertyPath: m_BrainParameters.VectorObservationSize
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 1512385078699942400, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -183,5 +260,10 @@ GameObject:
 --- !u!4 &748935617912600490 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1512385078699942400, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
+  m_PrefabInstance: {fileID: 2205025277645657514}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &754001744286105698 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1508444577325995464, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
   m_PrefabInstance: {fileID: 2205025277645657514}
   m_PrefabAsset: {fileID: 0}
