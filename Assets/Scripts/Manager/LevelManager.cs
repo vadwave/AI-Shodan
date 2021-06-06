@@ -14,6 +14,7 @@ public class LevelManager : MonoBehaviour
     [SerializeField] GameObject playerPrefab;
     [SerializeField] float maxMinutes;
     [SerializeField] Shodan shodan;
+    [SerializeField] AstarPath path;
     Player player;
 
 
@@ -106,6 +107,7 @@ public class LevelManager : MonoBehaviour
     void SetExit(Transform exit)
     {
         this.exit = exit;
+        //player.AddElementStack(this.exit);
     }
     void SetStart(Transform start)
     {
@@ -114,6 +116,8 @@ public class LevelManager : MonoBehaviour
     void Respawn(Transform positionBody, Transform rotationBody)
     {
         level.Initialize();
+        path.Scan();
+        player.AddElementStack(this.exit);
         Transform parent = this.start.parent.parent;
 
         float angle = 90f + parent.eulerAngles.z;

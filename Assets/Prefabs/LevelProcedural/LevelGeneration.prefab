@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f67c7e722ba14acd9153bb4488bff6e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SensorName: RayPerceptionSensor
+  m_SensorName: RayPerceptionSensor_2
   m_DetectableTags:
   - Wall
   - Door
@@ -184,7 +184,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 654203167, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
       propertyPath: m_InstanceId
-      value: -550036
+      value: -2292952
       objectReference: {fileID: 0}
     - target: {fileID: 2132101000, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
       propertyPath: m_MaxRayDegrees
@@ -204,11 +204,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1512385078699942400, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1.9199994
       objectReference: {fileID: 0}
     - target: {fileID: 1512385078699942400, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 2.5200005
       objectReference: {fileID: 0}
     - target: {fileID: 1512385078699942400, guid: 4674942d1bcbb5847902ff4da198066d, type: 3}
       propertyPath: m_LocalPosition.z

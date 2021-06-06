@@ -16,7 +16,7 @@ public class TimerManager : MonoBehaviour
     float maxMinutes = 999f;
     TimeEntity bestTime = new TimeEntity { min = 10, sec = 10, fraction = 10 };
     TimeEntity time = new TimeEntity { min = 11, sec = 10, fraction = 10 };
-
+    const string textCurTime = "Время: ";
     public float Score { set { score = value; } }
 
     public float TimeVisible { get { return visibleTimes; } set { visibleTimes = value; } }

@@ -5,6 +5,7 @@ public class Utils : Singleton<Utils>
     [SerializeField] LayerMask targetMask;
     [SerializeField] LayerMask guardMask;
     [SerializeField] LayerMask obstacleMask;
+    [SerializeField] LayerMask itemMask;
     [SerializeField] Camera main;
     [SerializeField] bool isDebug;
 
@@ -28,6 +29,6 @@ public class Utils : Singleton<Utils>
 
     protected override void AwakeSingleton()
     {
-        GameMath.Initialize(obstacleMask, targetMask, guardMask);
+        GameMath.Initialize(obstacleMask, targetMask, guardMask, itemMask);
     }
 }

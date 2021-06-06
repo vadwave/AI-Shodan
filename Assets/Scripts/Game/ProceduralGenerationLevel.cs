@@ -6,9 +6,18 @@ using Random = UnityEngine.Random;
 
 public class ProceduralGenerationLevel : MonoBehaviour
 {
+    enum TypeLevel
+    {
+        Speed,
+        Defence,
+        Filled
+    }
+
     [SerializeField] Vector2Int sizeMaze;
     [SerializeField] int seed;
     [SerializeField] bool isRandom = false;
+    [SerializeField] TypeLevel typeLevel;
+    [Range(1, 9)] [SerializeField] int difficultyLevel = 1;
 
     [Header("Prefabs")]
     [SerializeField] TileEntity prefab;
@@ -46,7 +55,37 @@ public class ProceduralGenerationLevel : MonoBehaviour
     public event Action<Transform> OnSetExit;
     public event Action<Transform> OnSetStart;
 
+    public string CurrentTypeLevel => typeLevel.ToString();
+    public string CurrentDiffLevel => difficultyLevel.ToString();
+    void SetParameters()
+    {
+        int diff = 1 - (1 / difficultyLevel);
+        Passage.Chance = diff;
+        Camera.Chance = diff;
+        InfoFile.Chance = diff;
 
+        if(typeLevel == TypeLevel.Defence)
+        {
+            countEnemies = 5;//5-9
+            countCollectables = 3;//3-5
+
+            Passage.Chance = 0;
+        }
+        else if (typeLevel == TypeLevel.Speed)
+        {
+            countEnemies = 2;//1-3
+            countCollectables = 0;//0-3
+
+            Passage.Chance = 0;
+            Camera.Chance = 0;
+            InfoFile.Chance = 0;
+        }
+        else if (typeLevel == TypeLevel.Filled)
+        {
+            countEnemies = 3;//3-5
+            countCollectables = 7;//5-7
+        }
+    }
     private void GenerateEnemies()
     {
         for (int i = 0; i < countEnemies; i++)
@@ -83,6 +122,41 @@ public class ProceduralGenerationLevel : MonoBehaviour
         }
     }
 
+    void GenerateRewardCollectables(Vector2Int sizeMaze, TileEntity[,] tiles, TypeTile setType, GameObject rewardCollectableObject, int countCollectables)
+    {
+        if (sizeMaze == null || tiles == null)
+        {
+            Debug.LogError("Отсутствует игровое поле для установки игровых обьектов для награждения!");
+        }
+        else if(rewardCollectableObject == null)
+        {
+            Debug.LogError("Требуемый шаблон игрового обьекта для награждения отсутствует!");
+        }
+        else if ((sizeMaze.x * sizeMaze.y) < countCollectables || countCollectables <= 0)
+        {
+            Debug.LogError("Количество награждаемых игровых объектов должен быть в пределах от 1 до площади игрового пространства!");
+        }
+        else
+        {
+            for (int i = 0; i < countCollectables; i++)
+            {
+                int x = Random.Range(0, sizeMaze.x - 1);
+                int y = Random.Range(0, sizeMaze.y - 1);
+
+                if (tiles[x, y].Type == TypeTile.Null)
+                {
+                    GameObject collect = rewardCollectableObject;
+                    tiles[x, y].SpawnOnFloor(collect);
+                    tiles[x, y].gameObject.name += (" " + setType.ToString());
+                    tiles[x, y].Type = setType;
+                }
+                else i--;
+            }
+            Debug.Log("Установка награждаемых игровых объектов выполнена!");
+        }
+
+    }
+
     internal void DestroyMaze()
     {
         if (isRandom) { Destroy(mazeParent); isReset = false; }
@@ -95,6 +169,7 @@ public class ProceduralGenerationLevel : MonoBehaviour
         {
             for (int y = 0; y < sizeMaze.y; y++)
             {
+                tiles[x, y].EnableTile();
                 switch (tiles[x, y].Type)
                 {
                     case TypeTile.Collectable:
@@ -138,6 +213,7 @@ public class ProceduralGenerationLevel : MonoBehaviour
 
     public void Initialize()
     {
+        SetParameters();
         if (!isReset)
         {
             InitializeParent();
@@ -307,6 +383,7 @@ public class ProceduralGenerationLevel : MonoBehaviour
                 stack.Add(current);
                 CompareWalls(current, checkTile);
                 current = checkTile;
+                //Debug.Log("sas " + current.name);
                 unvisited.Remove(current);
             }
             else if (stack.Count > 0)

@@ -6,6 +6,8 @@ public class TileEntity : MonoBehaviour
     [SerializeField] PillarsPoint pillars;
     [SerializeField] Transform floor;
     [SerializeField] Transform ParentOjects;
+    [SerializeField] BoxCollider2D trigger;
+
 
     [HideInInspector] public Vector2Int Position;
     [HideInInspector] public TypeTile Type;
@@ -163,5 +165,15 @@ public class TileEntity : MonoBehaviour
     void ClearChildrens(Transform parent)
     {
         foreach (Transform child in parent) GameObject.Destroy(child.gameObject);
+    }
+
+    public void EnableTile()
+    {
+        trigger.enabled = true;
+    }
+
+    public void DisableTile()
+    {
+        trigger.enabled = false;
     }
 }

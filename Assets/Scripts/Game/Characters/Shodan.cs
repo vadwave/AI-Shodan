@@ -5,7 +5,20 @@ using UnityEngine.UI;
 
 public class Shodan : MonoBehaviour
 {
-    [SerializeField] Text text;
+    [Header("Visual")]
+    [SerializeField] Text textType;
+    [SerializeField] Text textDiffucalty;
+    [SerializeField] Text textTime;
+    [SerializeField] GameObject canvas;
+    [SerializeField] ProceduralGenerationLevel level;
+    [SerializeField] Text getTime;
+
+
+    [Header("Settings")]
+    [Range(1, 15)] 
+    [SerializeField] int countActions;
+    [Range(0f, 15f)] 
+    [SerializeField] float timeDelay;
     private Coroutine corWait;
     private float counter;
     const string textAIShodan = "AI-Shodan: ";
@@ -20,52 +33,50 @@ public class Shodan : MonoBehaviour
 
     const string textStart = textAIShodan + "Воришка тебе не скрыться с этими данными через 3 минуты тебя поймают!";
 
+    const string textCurTime = "Время: ";
+    const string textCurType = "Тип ИП: ";
+    const string textCurDiff = "Сложность ИП: ";
+
     private void Start()
     {
-        
+        canvas.SetActive(false);
     }
 
-    public void StartEscaping(Transform transform,Transform transform1)
+    public void StartEscaping(Transform transform, Transform transform1)
     {
-        if (corWait == null) corWait = StartCoroutine(CoroutineWait(textStart));
+
     }
 
     public void CollectInfo(float values)
     {
-        if (corWait == null) corWait = StartCoroutine(CoroutineWait(textCollectInfo));
+
     }
     public void FindTarget()
     {
-        if (corWait == null) corWait = StartCoroutine(CoroutineWait(textFindTarget));
+
     }
     public void LostTarget()
     {
-        if (corWait == null) corWait = StartCoroutine(CoroutineWait(textCancelTarget));
-        else
-        {
-            StopCoroutine(corWait); 
-            corWait = StartCoroutine(CoroutineWait(textCancelTarget));
-        }
+
     }
     public void Result()
     {
-        if (corWait == null) corWait = StartCoroutine(CoroutineWait(textResultJourney, 6f));
-        else
-        {
-            StopCoroutine(corWait);
-            corWait = StartCoroutine(CoroutineWait(textResultJourney, 6f));
-        }
+        Time.timeScale = 0;
+        textTime.text = textCurTime+getTime.text;
+        string textTypes = "Оборонный";
+        if (level.CurrentTypeLevel == "Speed")
+            textTypes = "Быстрый";
+        else if (level.CurrentTypeLevel == "Filled")
+            textTypes = " Наполненный";
+        else if (level.CurrentTypeLevel == "Defence")
+            textTypes = "Оборонный";
+        textType.text = textCurType + textTypes;
+        textDiffucalty.text = textCurDiff + level.CurrentDiffLevel;
+        canvas.SetActive(true);
     }
-    IEnumerator CoroutineWait(string textArea, float waitTime = 3f)
+    public void Restart()
     {
-        text.text = textArea;
-        counter = 0;
-        while (counter < waitTime)
-        {
-            counter += Time.deltaTime;
-            yield return null;
-        }
-        text.text = textAIShodan;
-        corWait = null;
+        canvas.SetActive(false);
+        Time.timeScale = 1;
     }
 }

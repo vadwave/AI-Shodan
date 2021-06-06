@@ -9,13 +9,15 @@ public static class GameMath
     static LayerMask targetMask;
     static LayerMask guardMask;
     static LayerMask obstacleMask;
+    static LayerMask itemMask;
 
 
-    public static void Initialize(LayerMask obstacleMask, LayerMask targetMask, LayerMask guardMask)
+    public static void Initialize(LayerMask obstacleMask, LayerMask targetMask, LayerMask guardMask, LayerMask itemMask)
     {
         GameMath.targetMask = targetMask;
         GameMath.guardMask = guardMask;
         GameMath.obstacleMask = obstacleMask;
+        GameMath.itemMask = itemMask;
     }
 
 
@@ -100,7 +102,7 @@ public static class GameMath
         visibleTargets.Clear();
 
         LayerMask curTargetMask = targetMask;
-        if (isThief) curTargetMask = guardMask;
+        if (isThief) curTargetMask = guardMask | itemMask;
 
         if (Utils.Instance.DebugMode)
         {

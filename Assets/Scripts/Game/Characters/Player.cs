@@ -19,9 +19,14 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     [Range(0, 360)]
     [SerializeField] int viewAngle = 20;
     [SerializeField] bool enableVision = false;
+    [SerializeField] Pathfinding.AIDestinationSetter dest;
+
     [Header("DEBUG")]
     [SerializeField] Transform lastPoint; 
     [SerializeField] List<Transform> visibleTargets = new List<Transform>();
+    [SerializeField] bool isAuto = true;
+
+    Stack<Transform> listTargets;
 
     const float timeDelay = 0.0f;
     private bool isWaiting = false;
@@ -68,13 +73,13 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         sumValue = 0;
         SetResetParameters();
         Respawn();
+        Find(true);
     }
     public override void Heuristic(float[] actionsOut)
     {
         //base.Heuristic(actionsOut);
         //InputControl(ref actionsOut);
-        InputControl(ref actionsOut);
-
+        //InputControl(ref actionsOut);
     }
     public override void OnActionReceived(float[] vectorAction)
     {
@@ -94,7 +99,6 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
             {
                 sensor.AddObservation(rigBody.velocity.normalized.x);
                 sensor.AddObservation(rigBody.velocity.normalized.y);
-
             }
             sensor.AddObservation(body.rotation.normalized.z);//body.rotation.eulerAngles.normalized.z
             sensor.AddObservation(body.rotation.normalized.w);
@@ -102,9 +106,8 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
             {
                 Vector2 dirToExit = (level.exit.position - rigBody.transform.position).normalized;
                 //Debug.Log(dirToExit.ToString());
-                sensor.AddObservation(dirToExit.x);
-                sensor.AddObservation(dirToExit.y); 
-
+                //sensor.AddObservation(dirToExit.x);
+                //sensor.AddObservation(dirToExit.y); 
             }
         }
       
@@ -113,7 +116,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     public void AddAgentReward(float value)
     {
         sumValue += value;
-        //Debug.Log("Add Reward: " + value.ToString());
+        Debug.Log("Add Reward: " + value.ToString());
         AddReward(value);
     }
 
@@ -218,7 +221,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     {
         foreach (Transform target in visibleTargets)
         {
-            if (target.GetComponent<SecurityCamera>())
+            if (target.parent?.parent?.GetComponent<SecurityCamera>())
             {
                 AddAgentReward(- Rewards.Check);
                 Debug.Log("Find Camera score: -" + Rewards.Check);
@@ -230,6 +233,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
             }
             else if (target.GetComponent<CollectLogic>())
             {
+                AddElementStack(target);
                 AddAgentReward(Rewards.Check);
                 Debug.Log("Find CollectLogic score: +" + Rewards.Check);
             }
@@ -268,6 +272,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         while (true)
         {
             yield return new WaitForSeconds(delay);
+            if (listTargets.Peek() == null) listTargets.Pop();
             GameMath.FindVisibleTargets(body, visibleTargets, viewDistance, viewAngle, true);
         }
     }
@@ -294,7 +299,7 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
             if (((minSize.x <= currentPos.x) && (currentPos.x <= maxSize.x)) &&
                 ((minSize.y <= currentPos.y) && (currentPos.y <= maxSize.y)))
             {
-                AddAgentReward(-Rewards.Check);
+                //AddAgentReward(-Rewards.Check);
                 //Debug.Log("ALARM! Change Position!");
             }
             yield return null;
@@ -308,7 +313,11 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
 
     public void ExitLevel(bool success = true)
     {
-        if(corCheckPos!=null)
+        if (corFind != null)
+        StopCoroutine(corFind);
+        corFind = null;
+
+        if (corCheckPos!=null)
         StopCoroutine(corCheckPos);
         corCheckPos = null;
         OnEscaped?.Invoke();
@@ -337,7 +346,20 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
     {
         if (collision.gameObject.tag == "Finish")
         {
+            RemoveElementStack();
+            ClearElementsStack();
             ExitLevel();
+        }
+        if (collision.gameObject.tag == "Tile")
+        {
+            collision.transform.parent.GetComponent<TileEntity>().DisableTile();
+            AddAgentReward(Rewards.Key);
+        }
+        if (collision.GetComponent<CollectLogic>())
+        {
+            AddElementStack(collision.transform);
+            RemoveElementStack();
+            Destroy(collision.gameObject);
         }
     }
     private void OnCollisionEnter2D(Collision2D collision)
@@ -382,6 +404,26 @@ public class Player : Agent, IDamageable, IDamageDealer, IMovable, IRotable, IEy
         scores++;
         AddAgentReward(Rewards.Collectable);
         OnAddedScore?.Invoke(scores);
+    }
+
+    public void ClearElementsStack()
+    {
+        listTargets = new Stack<Transform>();
+    }
+    public void AddElementStack(Transform transform)
+    {
+        if (listTargets == null) listTargets = new Stack<Transform>();
+        if (listTargets.Contains(transform)) return;
+        Debug.Log("Stack Added -" + transform.name);
+        listTargets.Push(transform);
+        dest.target = listTargets.Peek();
+    }
+    void RemoveElementStack()
+    {
+        Debug.Log("Stack Removed -" + listTargets.Peek().name);
+        listTargets.Pop();
+        if(listTargets.Count>0)
+        dest.target = listTargets.Peek();
     }
 
     #endregion

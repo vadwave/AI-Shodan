@@ -6,7 +6,7 @@ public class CollectLogic : MonoBehaviour, ITakeable
     {
         if (!DetectCharacter(collision)) return;
         AddItem(collision);
-        Destroy(this.gameObject);
+        //Destroy(this.gameObject);
     }
 
     bool DetectCharacter(Collider2D collision)
